@@ -3,27 +3,9 @@ class Main extends NextGame {
 	init()
 	{
 		super.init();
-		this.canvas.fill('black');
-
 		this.canvasImage = this.canvas.image();
-
-		// canvas.fill('black');
-		// canvas.rect(10,10,100,100, 'red');
-		// canvas.rectf(110,110,200,100, 'blue');
-		// canvas.pixel(400,300, 'green');
-		// canvas.setFont("bold 18px monospace");
-		// canvas.text(200,400, 'green', 'hoho!');
-		// //canvas.circlef(400,200, 30, 'pink');
-		// canvas.circle(400,200, 30, 'pink', 20);
 	}
 
-	fadeOut(image, percent)
-	{
-		for (let i = 0; i < image.data.length; i += 4)
-		{
-			image.data[i] *= percent;
-		}
-	}
 
 	update()
 	{
@@ -31,33 +13,73 @@ class Main extends NextGame {
 
 		//console.log(this.elapsedTime);
 
-		this.fadeOut(im, 0.95);
-
-		for (let i = 0; i < 150; i++)
+		for (let x = 0; x < im.width; x++)
 		{
-			let x = Utils.random(0, this.canvas.width());
-			let y = Utils.random(0, this.canvas.height());
-
-			let index = (y * this.canvas.width() + x) * 4;
-
-			im.data[index] = 255;
-			im.data[index+3] = 255;
+			im.putPixel(x, im.height -1 , this.randomPixel());
 		}
+
+		let w = im.width, h = im.height;
+
+
+		for (let y = 0; y < im.height - 1; y++)
+		{
+			for (let x = 0; x < im.width; x++)
+			{
+				let a = im.getPixel((x - 1 + w) % w, (y + 1) % h);
+				let b = im.getPixel(x , (y + 1) % h);
+				let c = im.getPixel((x + 1) % w, (y + 1) % h);
+				let d = im.getPixel(x, (y + 2) % h);
+
+				im.putPixel(x, y, this.avg(a, b, c, d));
+			}
+		}
+
 
 		this.canvas.image(im);
 
-		//this.canvas.text(20, 20, '#3f3', Utils.round(1000/this.elapsedTime, 2) + ' fps');
 		this.canvas.text(20, 20, '#3f3', this.kb.key);
-
-		this.canvas.spline([20, 20, 50, 30, 5, 60, 70, 100], 'orange', 3);
 
 		if(this.mouse.buttons) {
 			this.canvas.circle(this.mouse.x, this.mouse.y, 10, 'lime');
-			console.log(this.mouse);
 			this.mouse.buttons = 0;
 		}
 
 		this.requestUpdate();
+	}
+
+	avg(a, b, c, d)
+	{
+		for(let i = 0; i < 3; i++) {
+			a[i] = Math.floor((a[i] + b[i] + c[i] + d[i]) / 4.03);
+		}
+
+		return a;
+	}
+
+	rgbToInt(pixel)
+	{
+		return (pixel[0] << 16) + (pixel[1] << 8) + pixel[2];
+
+	}
+
+	intToRgb(color)
+	{
+		return [
+   		(color >> 16) & 255,
+    	(color >> 8) & 255,
+     	color & 255,
+     	255
+		];
+	}
+
+	randomPixel()
+	{
+		return [
+			Utils.random(200,255),
+			Utils.random(50,200),
+			Utils.random(50,100),
+			255
+		];
 	}
 
 }
