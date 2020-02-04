@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Canvas test</title>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="Utils.js"></script>
+	<script src="NextCanvas.js"></script>
+	<script src="NextGame.js"></script>
+	<script src="flame.js"></script>
+	<script>
+		function start()
+		{
+			const main = new Main();
+			main.init();
+		}
+
+		$(document).ready(start);
+	</script>
+	<style>
+		#canvas-xxx {
+		  width: 512px;
+		  height: 512px;
+			image-rendering: pixelated;
+		}
+
+		body {
+			margin: 0;
+		}
+		
+		#canvas {
+		  width: 100%;
+		  height: 100%;
+			image-rendering: pixelated;
+		}		
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="800" height="600"></canvas>
+</body>
+</html>
