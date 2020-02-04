@@ -57,7 +57,10 @@ class NextCanvas
 			this.context.putImageData(im, 0, 0);
 		}
 		else {
-			return this.context.getImageData(0, 0, this.width(), this.height());
+			let im = this.context.getImageData(0, 0, this.width(), this.height());
+			im.getPixel = (x, y) => this.getPixel(im, x, y);
+			im.putPixel = (x, y, pixel) => this.putPixel(im, x, y, pixel);
+			return im;
 		}
 	}
 
@@ -99,6 +102,23 @@ class NextCanvas
 		this.rectf(x, y, 1, 1, color);
 		return this;
 	}
+
+	getPixel(im, x, y)
+	{
+		let i = (y * im.width + x) * 4;
+		return [im.data[i], im.data[i+1], im.data[i+2], im.data[i+3]];
+	}
+
+	putPixel(im, x, y, pixel)
+	{
+		let i = (y * im.width + x) * 4;
+		
+		im.data[i] = pixel[0];
+		im.data[i+1] = pixel[1];
+		im.data[i+2] = pixel[2];
+		im.data[i+3] = pixel[3];
+	}
+
 
 	setFont(font)
 	{
