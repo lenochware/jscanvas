@@ -3,7 +3,14 @@ class Main extends NextGame {
 	init()
 	{
 		super.init();
+		this.fullScreen();
 		this.canvasImage = this.canvas.image();
+	}
+
+	fullScreen()
+	{
+		this.canvas.width(200);
+		this.canvas.height(Math.floor($(window).height() / $(window).width() * 200));
 	}
 
 
@@ -74,10 +81,12 @@ class Main extends NextGame {
 
 	randomPixel()
 	{
+		//if (Math.random() < 0.5) return [0,255,0,255];
+
 		return [
-			Utils.random(200,255),
-			Utils.random(50,200),
-			Utils.random(50,100),
+			Utils.random(100,255),
+			Utils.random(10,200),
+			Utils.random(10,100),
 			255
 		];
 	}

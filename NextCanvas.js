@@ -22,13 +22,21 @@ class NextCanvas
 		return this;
 	}
 
-	width()
+	width(num)
 	{
+		if (num) {
+			this.context.canvas.width = num;
+		}
+
 		return this.context.canvas.width;
 	}
 
-	height()
+	height(num)
 	{
+		if (num) {
+			this.context.canvas.height = num;
+		}
+
 		return this.context.canvas.height;
 	}
 
@@ -112,7 +120,7 @@ class NextCanvas
 	putPixel(im, x, y, pixel)
 	{
 		let i = (y * im.width + x) * 4;
-		
+
 		im.data[i] = pixel[0];
 		im.data[i+1] = pixel[1];
 		im.data[i+2] = pixel[2];
