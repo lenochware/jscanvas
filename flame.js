@@ -16,6 +16,10 @@ class Main extends NextGame {
 
 	update()
 	{
+		this.requestUpdate();
+
+		//if (this.now() - this.time < 30) return;
+
 		let im = this.canvasImage;
 
 		//console.log(this.elapsedTime);
@@ -51,7 +55,7 @@ class Main extends NextGame {
 			this.mouse.buttons = 0;
 		}
 
-		this.requestUpdate();
+		this.time = this.now();
 	}
 
 	avg(a, b, c, d)

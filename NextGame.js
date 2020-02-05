@@ -6,7 +6,7 @@ class NextGame {
 		this.kb = { key: ''};
 		this.canvas = new NextCanvas('canvas');
 		this.elapsedTime = 0;
-		this._tm = 0;
+		this.time = this.now();
 	}
 
 	init()
@@ -15,6 +15,11 @@ class NextGame {
 		this.canvas.on('mousedown', e => this.getMouseButtons(e));
 		this.canvas.on('mousemove', e => this.getMousePos(e));
 		this.requestUpdate();
+	}
+
+	now()
+	{
+		return Date.now();
 	}
 
 	initKeyboard()
@@ -42,15 +47,13 @@ class NextGame {
 	requestUpdate()
 	{
 		window.requestAnimationFrame(tm => {
-			this.elapsedTime = tm - this._tm;
-			this._tm = tm;
 			this.update();
 		});
 	}
 
 	update()
 	{
-		this.requestUpdate();
+		this.time = this.now();
 	}
 
 }
