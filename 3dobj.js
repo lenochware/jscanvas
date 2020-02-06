@@ -3,7 +3,6 @@ class Main extends NextGame {
 	init()
 	{
 		super.init();
-		this.canvasImage = this.canvas.image();
 
 		this.objects = {};
 		this.objects.sphere = this.createSphere();
@@ -11,10 +10,12 @@ class Main extends NextGame {
 		this.view = {};
 
 		this.view.center = {
-			x: Math.floor(this.canvasImage.width / 2),
-			y: Math.floor(this.canvasImage.height / 2),
+			x: Math.floor(this.canvas.width() / 2),
+			y: Math.floor(this.canvas.height() / 2),
 			z: 200
 		};
+
+		this.angle = 0;
 
 		this.view.scale = {x: 128, y: 128, z: 1};
 	}
@@ -51,19 +52,61 @@ class Main extends NextGame {
 		image.putPixel(nx, ny, color);
 	}
 
+	sin(i)
+	{
+		return Math.sin(i * Math.PI / 1800);
+	}
+
+	cos(i)
+	{
+		return Math.cos(i * Math.PI / 1800);
+	}
+
+	rotate(sourceObj, ax, ay, az)
+	{
+		//let obj = sourceObj.slice();
+		let obj = [];
+
+		let x,y,z;
+
+		for (let i = 0; i < sourceObj.length; i++)
+		{
+			//rotace podle X
+			y=Math.round(sourceObj[i].y*this.cos(ax)-sourceObj[i].z*this.sin(ax));
+			z=Math.round(sourceObj[i].z*this.cos(ax)+sourceObj[i].y*this.sin(ax));
+			
+			//rotace podle Y
+			x=Math.round(sourceObj[i].x*this.cos(ay)-z*this.sin(ay));
+			// obj[i].z = Math.round(z*this.cos(ay)+sourceObj[i].x*this.sin(ay));
+			
+			// //rotace podle Z
+			// obj[i].x = Math.round(x*this.cos(az)-y*this.sin(az));
+			// obj[i].y = Math.round(y*this.cos(az)+x*this.sin(az));
+
+			obj[i] = {
+				x: Math.round(x*this.cos(az)-y*this.sin(az)),
+				y: Math.round(y*this.cos(az)+x*this.sin(az)),
+				z:  Math.round(z*this.cos(ay)+sourceObj[i].x*this.sin(ay))
+			}
+		}
+		
+		return obj;
+	}
+
 	update()
 	{
 		this.requestUpdate();
 
 		//if (this.now() - this.time < 30) return;
 
-		let im = this.canvasImage;
+		this.canvas.clear();
+		let im = this.canvas.image();
 
 		//---
-		let sphere = this.objects.sphere;
+		let sphere = this.rotate(this.objects.sphere, 0, this.angle+=10, 0);
 
 		for ( let i=0; i < sphere.length; i++) {
-			this.putPixel(im, sphere[i], [255,0,0,255]);
+			this.putPixel(im, sphere[i], [100 - sphere[i].z,0,0,255]);
 		}
 
 		this.canvas.image(im);
