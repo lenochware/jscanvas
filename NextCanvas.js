@@ -113,12 +113,18 @@ class NextCanvas
 
 	getPixel(im, x, y)
 	{
+		if (x < 0 || y < 0 || x > im.width-1 || y > im.height-1) {
+			return [0,0,0,0];
+		}
+
 		let i = (y * im.width + x) * 4;
 		return [im.data[i], im.data[i+1], im.data[i+2], im.data[i+3]];
 	}
 
 	putPixel(im, x, y, pixel)
 	{
+		if (x < 0 || y < 0 || x > im.width-1 || y > im.height-1) return;
+
 		let i = (y * im.width + x) * 4;
 
 		im.data[i] = pixel[0];
