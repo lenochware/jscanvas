@@ -6,6 +6,9 @@ class Main extends NextGame {
 
 		this.objects = {};
 		this.objects.sphere = this.createSphere();
+		this.objects.cube = this.createCube();
+		this.objects.twocubes = this.createTwoCubes();
+		this.objects.twospheres = this.createTwoSpheres();
 
 		this.view = {};
 
@@ -25,15 +28,84 @@ class Main extends NextGame {
 	{
 		let obj = [];
 
-		let third = 12;
+		const SEG = 12;
 
-		for (let x=0; x<third; x++) for (let y=0; y<third; y++) for (let z=0; z<third; z++) {
-			obj[z*third*third+y*third+x] = {
-				x: Math.floor(80 * Math.sin((z+1)*Math.PI/(third+1)) * Math.sin((x+y*third)*2*Math.PI/(third**2))), 
-				y: Math.floor(80 * Math.sin((z+1)*Math.PI/(third+1)) * Math.cos((x+y*third)*2*Math.PI/(third**2))), 
-				z: Math.floor(80 * Math.cos((z+1)*Math.PI/(third+1)))
+		for (let x=0; x<SEG; x++) for (let y=0; y<SEG; y++) for (let z=0; z<SEG; z++) {
+			obj[z*SEG*SEG+y*SEG+x] = {
+				x: Math.floor(80 * Math.sin((z+1)*Math.PI/(SEG+1)) * Math.sin((x+y*SEG)*2*Math.PI/(SEG**2))), 
+				y: Math.floor(80 * Math.sin((z+1)*Math.PI/(SEG+1)) * Math.cos((x+y*SEG)*2*Math.PI/(SEG**2))), 
+				z: Math.floor(80 * Math.cos((z+1)*Math.PI/(SEG+1)))
 			}
 		}
+
+		return obj;
+	}
+
+	createCube()
+	{
+		let obj = [];
+
+		const SEG = 12;
+
+		for (let x=0; x<SEG; x++) for (let y=0; y<SEG; y++) for (let z=0; z<SEG; z++) {
+			obj[z*SEG*SEG+y*SEG+x] = {
+				x : Math.floor((SEG/2-x)*(120/SEG)-8), 
+				y : Math.floor((SEG/2-y)*(120/SEG)-8), 
+				z : Math.floor((SEG/2-z)*(120/SEG)-8)
+			}
+		}			
+
+		return obj;
+	}
+
+	createTwoCubes()
+	{
+		let obj = [];
+
+		const SEG = 12;		
+
+		for (let x=0; x<SEG; x++) for (let y=0; y<SEG; y++) for (let z=0; z<SEG; z++) {
+			if (x%2 == 0) {
+				obj[z*SEG*SEG+y*SEG+x] = {
+					x: Math.floor(70*x/SEG), 
+					y: Math.floor(70*y/SEG), 
+					z: Math.floor(70*z/SEG)
+				}				
+			}
+			else {
+				obj[z*SEG*SEG+y*SEG+x] = {
+					x: -Math.floor(70*x/SEG), 
+					y: -Math.floor(70*y/SEG), 
+					z: -Math.floor(70*z/SEG)
+				}
+			}
+		}			
+
+		return obj;
+	}
+
+	createTwoSpheres()
+	{
+		let obj = [];
+
+		const SEG = 12;			
+
+		for (let x=0; x<SEG; x++) for (let y=0; y<SEG; y++) for (let z=0; z<SEG; z++) {
+			if (x%2 == 0) {
+				obj[z*SEG*SEG+y*SEG+x] = {
+					x: 80+Math.floor(40*Math.sin((z+1)*Math.PI/(SEG+1))*Math.sin((x+y*SEG)*2*Math.PI/(SEG**2))), 
+					y: Math.floor(40*Math.sin((z+1)*Math.PI/(SEG+1))*Math.cos((x+y*SEG)*2*Math.PI/(SEG**2))), 
+					z: Math.floor(40*Math.cos((z+1)*Math.PI/(SEG+1)))
+				}
+			}
+			else {
+				obj[z*SEG*SEG+y*SEG+x] = {
+					x: -80-Math.floor(40*Math.sin((z+1)*Math.PI/(SEG+1))*Math.sin((x+y*SEG)*2*Math.PI/(SEG**2))), 
+					y: -Math.floor(40*Math.sin((z+1)*Math.PI/(SEG+1))*Math.cos((x+y*SEG)*2*Math.PI/(SEG**2))), 
+					z: -Math.floor(40*Math.cos((z+1)*Math.PI/(SEG+1)))
+				}
+			}
+		}	
 
 		return obj;
 	}
@@ -86,7 +158,7 @@ class Main extends NextGame {
 			obj[i] = {
 				x: Math.round(x*this.cos(az)-y*this.sin(az)),
 				y: Math.round(y*this.cos(az)+x*this.sin(az)),
-				z:  Math.round(z*this.cos(ay)+sourceObj[i].x*this.sin(ay))
+				z: Math.round(z*this.cos(ay)+sourceObj[i].x*this.sin(ay))
 			}
 		}
 		
@@ -103,10 +175,10 @@ class Main extends NextGame {
 		let im = this.canvas.image();
 
 		//---
-		let sphere = this.rotate(this.objects.sphere, 0, this.angle+=10, 0);
+		let obj = this.rotate(this.objects.twospheres, 0, this.angle+=10, 0);
 
-		for ( let i=0; i < sphere.length; i++) {
-			this.putPixel(im, sphere[i], [100 - sphere[i].z,0,0,255]);
+		for ( let i=0; i < obj.length; i++) {
+			this.putPixel(im, obj[i], [100 - obj[i].z,0,0,255]);
 		}
 
 		this.canvas.image(im);
