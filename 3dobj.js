@@ -21,6 +21,8 @@ class Main extends NextGame {
 		this.angle = 0;
 
 		this.view.scale = {x: 128, y: 128, z: 1};
+
+		this.canvasImage = this.canvas.image();
 	}
 
 
@@ -134,6 +136,14 @@ class Main extends NextGame {
 		return Math.cos(i * Math.PI / 1800);
 	}
 
+	fadeOut(image, percent)
+	{
+		for (let i = 0; i < image.data.length; i += 4)
+		{
+			image.data[i] *= percent;
+		}
+	}
+
 	rotate(sourceObj, ax, ay, az)
 	{
 		//let obj = sourceObj.slice();
@@ -169,10 +179,9 @@ class Main extends NextGame {
 	{
 		this.requestUpdate();
 
-		//if (this.now() - this.time < 30) return;
-
-		this.canvas.clear();
-		let im = this.canvas.image();
+		//this.canvas.clear();
+		let im = this.canvasImage;
+		this.fadeOut(im, 0.9);
 
 		//---
 		let obj = this.rotate(this.objects.twospheres, 0, this.angle+=10, 0);
