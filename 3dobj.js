@@ -23,7 +23,7 @@ class Main extends NextGame {
 			angleX: 0,
 			angleY: 0,
 			angleZ: 0,
-			size: 1 
+			size: 0 
 		}
 
 		this.view.scale = {x: 128, y: 128, z: 1};
@@ -152,7 +152,6 @@ class Main extends NextGame {
 
 	rotate(sourceObj, ax, ay, az)
 	{
-		//let obj = sourceObj.slice();
 		let obj = [];
 
 		let x,y,z;
@@ -161,15 +160,8 @@ class Main extends NextGame {
 		{
 			//rotace podle X
 			y=Math.round(sourceObj[i].y*this.cos(ax)-sourceObj[i].z*this.sin(ax));
-			z=Math.round(sourceObj[i].z*this.cos(ax)+sourceObj[i].y*this.sin(ax));
-			
-			//rotace podle Y
+			z=Math.round(sourceObj[i].z*this.cos(ax)+sourceObj[i].y*this.sin(ax));			
 			x=Math.round(sourceObj[i].x*this.cos(ay)-z*this.sin(ay));
-			// obj[i].z = Math.round(z*this.cos(ay)+sourceObj[i].x*this.sin(ay));
-			
-			// //rotace podle Z
-			// obj[i].x = Math.round(x*this.cos(az)-y*this.sin(az));
-			// obj[i].y = Math.round(y*this.cos(az)+x*this.sin(az));
 
 			obj[i] = {
 				x: Math.round(x*this.cos(az)-y*this.sin(az)),
@@ -181,6 +173,19 @@ class Main extends NextGame {
 		return obj;
 	}
 
+	resize(srcObj, size)
+	{
+		let obj = [];
+
+		for (let i = 0; i < srcObj.length; i++)
+		{
+			obj[i] = {x: srcObj[i].x * size, y: srcObj[i].y * size, z: srcObj[i].z * size}
+		}
+
+		return obj;
+
+	}
+
 	updateState()
 	{
 		let s = this.state;
@@ -188,6 +193,7 @@ class Main extends NextGame {
 		s.angleX = (s.angleX + 33) % 3600;
 		s.angleY = (s.angleY + 21) % 3600;
 		s.angleZ = (s.angleZ + 18) % 3600;
+		//s.size += 1;
 	}
 
 	update()
@@ -201,10 +207,12 @@ class Main extends NextGame {
 		this.fadeOut(im, 0.8);
 
 		//---
-		let obj = this.rotate(s.obj, s.angleX, s.angleY, s.angleZ);
+		let obj = s.obj;
+		//obj = this.resize(obj, 1 + s.size / 100);
+		obj = this.rotate(obj, s.angleX, s.angleY, s.angleZ);
 
 		for ( let i=0; i < obj.length; i++) {
-			this.putPixel(im, obj[i], [100 - obj[i].z,0,0,255]);
+			this.putPixel(im, obj[i], [255/*100 - obj[i].z */,0,0,255]);
 		}
 
 		this.canvas.image(im);
