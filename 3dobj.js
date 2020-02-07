@@ -18,7 +18,13 @@ class Main extends NextGame {
 			z: 200
 		};
 
-		this.angle = 0;
+		this.state = {
+			obj: this.objects.twospheres,
+			angleX: 0,
+			angleY: 0,
+			angleZ: 0,
+			size: 1 
+		}
 
 		this.view.scale = {x: 128, y: 128, z: 1};
 
@@ -175,22 +181,35 @@ class Main extends NextGame {
 		return obj;
 	}
 
+	updateState()
+	{
+		let s = this.state;
+
+		s.angleX = (s.angleX + 33) % 3600;
+		s.angleY = (s.angleY + 21) % 3600;
+		s.angleZ = (s.angleZ + 18) % 3600;
+	}
+
 	update()
 	{
 		this.requestUpdate();
 
 		//this.canvas.clear();
 		let im = this.canvasImage;
-		this.fadeOut(im, 0.9);
+		let s = this.state;
+
+		this.fadeOut(im, 0.8);
 
 		//---
-		let obj = this.rotate(this.objects.twospheres, 0, this.angle+=10, 0);
+		let obj = this.rotate(s.obj, s.angleX, s.angleY, s.angleZ);
 
 		for ( let i=0; i < obj.length; i++) {
 			this.putPixel(im, obj[i], [100 - obj[i].z,0,0,255]);
 		}
 
 		this.canvas.image(im);
+
+		this.updateState();
 
 		this.canvas.text(20, 20, '#3f3', this.kb.key);
 
