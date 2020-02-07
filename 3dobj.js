@@ -23,7 +23,7 @@ class Main extends NextGame {
 			angleX: 0,
 			angleY: 0,
 			angleZ: 0,
-			size: 0 
+			step: 0 
 		}
 
 		this.view.scale = {x: 128, y: 128, z: 1};
@@ -183,7 +183,23 @@ class Main extends NextGame {
 		}
 
 		return obj;
+	}
 
+
+	morph(a, b, t)
+	{	
+		let obj = [];
+
+		for (let i = 0; i < a.length; i++)
+		{						
+			obj[i] = {
+				x: Math.round(a[i].x + (b[i].x - a[i].x) * t),
+				y: Math.round(a[i].y + (b[i].y - a[i].y) * t),
+				z: Math.round(a[i].z + (b[i].z - a[i].z) * t)
+			};
+		}
+
+		return obj;				
 	}
 
 	updateState()
@@ -193,7 +209,7 @@ class Main extends NextGame {
 		s.angleX = (s.angleX + 33) % 3600;
 		s.angleY = (s.angleY + 21) % 3600;
 		s.angleZ = (s.angleZ + 18) % 3600;
-		//s.size += 1;
+		s.step = (s.step + 1) % 200;
 	}
 
 	update()
@@ -209,7 +225,9 @@ class Main extends NextGame {
 		//---
 		let obj = s.obj;
 		//obj = this.resize(obj, 1 + s.size / 100);
-		obj = this.rotate(obj, s.angleX, s.angleY, s.angleZ);
+		//obj = this.rotate(obj, s.angleX, s.angleY, s.angleZ);
+
+		obj = this.morph(obj, this.objects.cube, s.step / 200);
 
 		for ( let i=0; i < obj.length; i++) {
 			this.putPixel(im, obj[i], [255/*100 - obj[i].z */,0,0,255]);
