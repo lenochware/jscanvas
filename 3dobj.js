@@ -12,6 +12,8 @@ class Main extends NextGame {
 
 		this.view = {};
 
+		this.paused = false;
+
 		this.view.center = {
 			x: Math.floor(this.canvas.width() / 2),
 			y: Math.floor(this.canvas.height() / 2),
@@ -215,6 +217,13 @@ class Main extends NextGame {
 	update()
 	{
 		this.requestUpdate();
+
+		if (this.kb.key == 'p') {
+			this.paused = !this.paused;
+			this.kb.key = '';
+		}
+
+		if (this.paused) return;
 
 		//this.canvas.clear();
 		let im = this.canvasImage;
