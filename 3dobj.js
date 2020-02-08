@@ -225,9 +225,9 @@ class Main extends NextGame {
 		//---
 		let obj = s.obj;
 		//obj = this.resize(obj, 1 + s.size / 100);
-		//obj = this.rotate(obj, s.angleX, s.angleY, s.angleZ);
 
 		obj = this.morph(obj, this.objects.cube, s.step / 200);
+		obj = this.rotate(obj, s.angleX, s.angleY, s.angleZ);
 
 		for ( let i=0; i < obj.length; i++) {
 			this.putPixel(im, obj[i], [255/*100 - obj[i].z */,0,0,255]);
