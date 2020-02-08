@@ -24,6 +24,14 @@ class Main extends NextGame {
 		return null;
 	}
 
+	addShape(s, cursor)
+	{
+		s.getNode(cursor);
+		this.selectedNode = s.getNode(cursor);
+		this.shapes.push(s);
+		this.kb.key = '';		
+	}
+
 	update()
 	{
 		this.requestUpdate();
@@ -47,21 +55,9 @@ class Main extends NextGame {
 		cursor.y = Math.round(this.mouse.y / this.gridSize) * this.gridSize;
 		this.canvas.circle(cursor.x, cursor.y, 2, 'purple');
 
-		if (this.kb.key == 'l') {
-			let line = new Line;
-			line.getNode(cursor);
-			this.selectedNode = line.getNode(cursor);
-			this.shapes.push(line);
-			this.kb.key = '';
-		}
-
-		if (this.kb.key == 'c') {
-			let line = new Circle;
-			line.getNode(cursor);
-			this.selectedNode = line.getNode(cursor);
-			this.shapes.push(line);
-			this.kb.key = '';
-		}		
+		if (this.kb.key == 'l') this.addShape(new Line, cursor);
+		if (this.kb.key == 'c') this.addShape(new Circle, cursor);
+		if (this.kb.key == 'r') this.addShape(new Rect, cursor);
 
 		if (this.selectedNode) {
 			this.selectedNode.x = cursor.x;
@@ -160,6 +156,23 @@ class Circle extends Shape
 		let p1 = this.nodes[0];
 		let p2 = this.nodes[1];
 		canvas.circle(p1.x, p1.y, Math.hypot(p2.x - p1.x, p2.y - p1.y) , this.color);
+		this.drawNodes(canvas);
+	}
+}
+
+class Rect extends Shape
+{
+	constructor()
+	{
+		super();
+		this.maxNodes = 2;
+	}
+
+	draw(canvas)
+	{
+		let p1 = this.nodes[0];
+		let p2 = this.nodes[1];
+		canvas.rect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y, this.color);
 		this.drawNodes(canvas);
 	}
 
