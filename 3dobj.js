@@ -4,11 +4,11 @@ class Main extends NextGame {
 	{
 		super.init();
 
-		this.objects = {};
-		this.objects.sphere = this.createSphere();
-		this.objects.cube = this.createCube();
-		this.objects.twocubes = this.createTwoCubes();
-		this.objects.twospheres = this.createTwoSpheres();
+		this.objects = [];
+		this.objects.push(this.createSphere());
+		this.objects.push(this.createCube());
+		this.objects.push(this.createTwoCubes());
+		this.objects.push(this.createTwoSpheres());
 
 		this.view = {};
 
@@ -21,16 +21,22 @@ class Main extends NextGame {
 		};
 
 		this.state = {
-			obj: this.objects.twospheres,
+			obj: this.pickRandomObj(),
+			next: this.pickRandomObj(),
 			angleX: 0,
 			angleY: 0,
 			angleZ: 0,
-			step: 0 
+			step: 0
 		}
 
 		this.view.scale = {x: 128, y: 128, z: 1};
 
 		this.canvasImage = this.canvas.image();
+	}
+
+	pickRandomObj()
+	{
+		return this.objects[Utils.random(0, this.objects.length)];
 	}
 
 
@@ -211,7 +217,12 @@ class Main extends NextGame {
 		s.angleX = (s.angleX + 33) % 3600;
 		s.angleY = (s.angleY + 21) % 3600;
 		s.angleZ = (s.angleZ + 18) % 3600;
-		s.step = (s.step + 1) % 200;
+		s.step = (s.step + 1) % 400;
+
+		if (s.step == 0) {
+			s.obj = s.next;
+			s.next = this.pickRandomObj();
+		}
 	}
 
 	update()
@@ -235,7 +246,10 @@ class Main extends NextGame {
 		let obj = s.obj;
 		//obj = this.resize(obj, 1 + s.size / 100);
 
-		obj = this.morph(obj, this.objects.cube, s.step / 200);
+		if (s.step >= 200) {
+			obj = this.morph(obj, s.next, (s.step - 200) / 200);
+		}
+		
 		obj = this.rotate(obj, s.angleX, s.angleY, s.angleZ);
 
 		for ( let i=0; i < obj.length; i++) {
