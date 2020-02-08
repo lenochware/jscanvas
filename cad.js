@@ -6,12 +6,9 @@ class Main extends NextGame {
 		//this.canvasImage = this.canvas.image();
 		this.shapes = [];
 
-		this.cursor = {x:0, y:0};
-		this.gridSize = 10;
+		this.selectedNode = null;
 
-		let s = new Shape();
-		s.nodes.push({x:50,y:50});
-		this.shapes.push(s);
+		this.gridSize = 10;
 	}
 
 	update()
@@ -28,25 +25,35 @@ class Main extends NextGame {
 			}
 		}
 
-
-
 		for (let s of this.shapes) {
 			s.draw(this.canvas);
 		}
 
-		this.cursor.x = Math.round(this.mouse.x / this.gridSize) * this.gridSize;
-		this.cursor.y = Math.round(this.mouse.y / this.gridSize) * this.gridSize;
-		this.canvas.pixel(this.cursor.x, this.cursor.y, 'red');
+		let cursor = {};
+		cursor.x = Math.round(this.mouse.x / this.gridSize) * this.gridSize;
+		cursor.y = Math.round(this.mouse.y / this.gridSize) * this.gridSize;
+		this.canvas.pixel(cursor.x, cursor.y, 'red');
 
-		if (this.kb.key == 'p') {
-			this.paused = !this.paused;
+		if (this.kb.key == 'l') {
+			let line = new Line;
+			line.getNode(cursor);
+			this.selectedNode = line.getNode(cursor);
+			this.shapes.push(line);
 			this.kb.key = '';
 		}
 
-		this.canvas.text(20, 20, '#3f3', this.kb.key);
+		if (this.selectedNode) {
+			this.selectedNode.x = cursor.x;
+			this.selectedNode.y = cursor.y;
+		}
+
 
 		if(this.mouse.buttons) {
-			this.canvas.circle(this.mouse.x, this.mouse.y, 10, 'lime');
+			if (this.selectedNode) {
+				this.selectedNode.shape.color = 'red';
+				this.selectedNode = null;
+			}
+
 			this.mouse.buttons = 0;
 		}
 
@@ -60,12 +67,37 @@ class Shape
 	constructor()
 	{
 		this.nodes = [];
+		this.color = 'green';
+		this.maxNodes = 0;
+	}
+
+	getNode(pos)
+	{
+		if (this.nodes.length >= this.maxNodes) return null;
+		let node = { shape: this, x: pos.x, y: pos.y	};
+		this.nodes.push(node);
+		return node;
 	}
 
 	draw(canvas)
 	{
-		for (let p of this.nodes) {
-			canvas.pixel(p.x, p.y, 'green');
-		}
+		throw Error('Abstract method.');
 	}
+}
+
+class Line extends Shape
+{
+	constructor()
+	{
+		super();
+		this.maxNodes = 2;
+	}
+
+	draw(canvas)
+	{
+		let p1 = this.nodes[0];
+		let p2 = this.nodes[1];
+		canvas.line(p1.x, p1.y, p2.x, p2.y, this.color);
+	}
+
 }
