@@ -3,7 +3,9 @@ class Main extends NextGame {
 	init()
 	{
 		super.init();
-		//this.canvasImage = this.canvas.image();
+		this.canvas.width(800);
+		this.canvas.height(600);
+
 		this.shapes = [];
 
 		this.selectedNode = null;
@@ -32,7 +34,7 @@ class Main extends NextGame {
 		let cursor = {};
 		cursor.x = Math.round(this.mouse.x / this.gridSize) * this.gridSize;
 		cursor.y = Math.round(this.mouse.y / this.gridSize) * this.gridSize;
-		this.canvas.pixel(cursor.x, cursor.y, 'red');
+		this.canvas.circle(cursor.x, cursor.y, 2, 'red');
 
 		if (this.kb.key == 'l') {
 			let line = new Line;
@@ -42,6 +44,14 @@ class Main extends NextGame {
 			this.kb.key = '';
 		}
 
+		if (this.kb.key == 'c') {
+			let line = new Circle;
+			line.getNode(cursor);
+			this.selectedNode = line.getNode(cursor);
+			this.shapes.push(line);
+			this.kb.key = '';
+		}		
+
 		if (this.selectedNode) {
 			this.selectedNode.x = cursor.x;
 			this.selectedNode.y = cursor.y;
@@ -50,7 +60,7 @@ class Main extends NextGame {
 
 		if(this.mouse.buttons) {
 			if (this.selectedNode) {
-				this.selectedNode.shape.color = 'red';
+				this.selectedNode.shape.color = 'green';
 				this.selectedNode = null;
 			}
 
@@ -67,7 +77,7 @@ class Shape
 	constructor()
 	{
 		this.nodes = [];
-		this.color = 'green';
+		this.color = 'red';
 		this.maxNodes = 0;
 	}
 
@@ -77,6 +87,14 @@ class Shape
 		let node = { shape: this, x: pos.x, y: pos.y	};
 		this.nodes.push(node);
 		return node;
+	}
+
+	drawNodes(canvas)
+	{
+		for (let node of this.nodes)
+		{
+			canvas.circlef(node.x, node.y, 2, '#9f9');
+		}
 	}
 
 	draw(canvas)
@@ -98,6 +116,25 @@ class Line extends Shape
 		let p1 = this.nodes[0];
 		let p2 = this.nodes[1];
 		canvas.line(p1.x, p1.y, p2.x, p2.y, this.color);
+		this.drawNodes(canvas);
+	}
+
+}
+
+class Circle extends Shape
+{
+	constructor()
+	{
+		super();
+		this.maxNodes = 2;
+	}
+
+	draw(canvas)
+	{
+		let p1 = this.nodes[0];
+		let p2 = this.nodes[1];
+		canvas.circle(p1.x, p1.y, Math.hypot(p2.x - p1.x, p2.y - p1.y) , this.color);
+		this.drawNodes(canvas);
 	}
 
 }
