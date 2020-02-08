@@ -13,6 +13,17 @@ class Main extends NextGame {
 		this.gridSize = 10;
 	}
 
+	findNode(pos)
+	{
+		for(let shape of this.shapes)
+		{
+			let node = shape.findNode(pos);
+			if (node) return node;
+		}
+
+		return null;
+	}
+
 	update()
 	{
 		this.requestUpdate();
@@ -34,7 +45,7 @@ class Main extends NextGame {
 		let cursor = {};
 		cursor.x = Math.round(this.mouse.x / this.gridSize) * this.gridSize;
 		cursor.y = Math.round(this.mouse.y / this.gridSize) * this.gridSize;
-		this.canvas.circle(cursor.x, cursor.y, 2, 'red');
+		this.canvas.circle(cursor.x, cursor.y, 2, 'purple');
 
 		if (this.kb.key == 'l') {
 			let line = new Line;
@@ -63,6 +74,10 @@ class Main extends NextGame {
 				this.selectedNode.shape.color = 'green';
 				this.selectedNode = null;
 			}
+			else {
+				this.selectedNode = this.findNode(cursor);
+				if (this.selectedNode) this.selectedNode.shape.color = 'red';
+			}
 
 			this.mouse.buttons = 0;
 		}
@@ -88,6 +103,17 @@ class Shape
 		this.nodes.push(node);
 		return node;
 	}
+
+	findNode(pos)
+	{
+		for(let node of this.nodes)
+		{
+			if (node.x == pos.x && node.y == pos.y) return node;
+		}
+
+		return null;
+	}
+
 
 	drawNodes(canvas)
 	{
