@@ -48,6 +48,7 @@ class Main extends NextGame {
 
 		for (let s of this.shapes) {
 			s.draw(this.canvas);
+			s.drawNodes(this.canvas);
 		}
 
 		let cursor = {};
@@ -68,7 +69,7 @@ class Main extends NextGame {
 		if(this.mouse.buttons) {
 			if (this.selectedNode) {
 				this.selectedNode.shape.color = 'green';
-				this.selectedNode = null;
+				this.selectedNode = this.selectedNode.shape.getNode(cursor);
 			}
 			else {
 				this.selectedNode = this.findNode(cursor);
@@ -138,7 +139,6 @@ class Line extends Shape
 		let p1 = this.nodes[0];
 		let p2 = this.nodes[1];
 		canvas.line(p1.x, p1.y, p2.x, p2.y, this.color);
-		this.drawNodes(canvas);
 	}
 
 }
@@ -156,7 +156,6 @@ class Circle extends Shape
 		let p1 = this.nodes[0];
 		let p2 = this.nodes[1];
 		canvas.circle(p1.x, p1.y, Math.hypot(p2.x - p1.x, p2.y - p1.y) , this.color);
-		this.drawNodes(canvas);
 	}
 }
 
@@ -173,7 +172,6 @@ class Rect extends Shape
 		let p1 = this.nodes[0];
 		let p2 = this.nodes[1];
 		canvas.rect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y, this.color);
-		this.drawNodes(canvas);
 	}
 
 }
