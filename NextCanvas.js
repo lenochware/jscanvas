@@ -186,6 +186,13 @@ class NextCanvas
 		this.ellipsef(x, y, r, r, style);
 	}
 
+	dashedLine(x1, y1, x2, y2, style, lineWidth = 1)
+	{
+		this.context.setLineDash([5,5]);
+		this.polyline([x1, y1, x2, y2], style, lineWidth);
+		this.context.setLineDash([]);
+	}
+
 	line(x1, y1, x2, y2, style, lineWidth = 1)
 	{
 		this.polyline([x1, y1, x2, y2], style, lineWidth);

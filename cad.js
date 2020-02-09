@@ -27,6 +27,11 @@ class Main extends NextGame {
 	addShape(s, cursor)
 	{
 		s.getNode(cursor);
+		
+		if (this.selectedNode) {
+			this.selectedNode.shape.color = 'green';
+		}
+
 		this.selectedNode = s.getNode(cursor);
 		this.shapes.push(s);
 		this.kb.key = '';		
@@ -59,6 +64,7 @@ class Main extends NextGame {
 		if (this.kb.key == 'l') this.addShape(new Line, cursor);
 		if (this.kb.key == 'c') this.addShape(new Circle, cursor);
 		if (this.kb.key == 'r') this.addShape(new Rect, cursor);
+		if (this.kb.key == 's') this.addShape(new Spline, cursor);
 
 		if (this.selectedNode) {
 			this.selectedNode.x = cursor.x;
@@ -68,8 +74,9 @@ class Main extends NextGame {
 
 		if(this.mouse.buttons) {
 			if (this.selectedNode) {
-				this.selectedNode.shape.color = 'green';
+				let s = this.selectedNode.shape;
 				this.selectedNode = this.selectedNode.shape.getNode(cursor);
+				if (!this.selectedNode) s.color = 'green';
 			}
 			else {
 				this.selectedNode = this.findNode(cursor);
@@ -155,7 +162,8 @@ class Circle extends Shape
 	{
 		let p1 = this.nodes[0];
 		let p2 = this.nodes[1];
-		canvas.circle(p1.x, p1.y, Math.hypot(p2.x - p1.x, p2.y - p1.y) , this.color);
+		canvas.circle(p1.x, p1.y, Math.hypot(p2.x - p1.x, p2.y - p1.y) , this.color);		
+		canvas.dashedLine(p1.x, p1.y, p2.x, p2.y, 'white');
 	}
 }
 
@@ -172,6 +180,31 @@ class Rect extends Shape
 		let p1 = this.nodes[0];
 		let p2 = this.nodes[1];
 		canvas.rect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y, this.color);
+	}
+
+}
+
+class Spline extends Shape
+{
+	constructor()
+	{
+		super();
+		this.maxNodes = 3;
+	}
+
+	draw(canvas)
+	{
+		let p1 = this.nodes[0];
+		let p2 = this.nodes[1];
+
+		canvas.dashedLine(p1.x, p1.y, p2.x, p2.y, 'white');
+
+		if (this.nodes.length < 3) return;
+
+		let p3 = this.nodes[2];
+
+		canvas.dashedLine(p2.x, p2.y, p3.x, p3.y, 'white');
+		canvas.spline([p1.x, p1.y, p2.x, p2.y, p3.x, p3.y], this.color);
 	}
 
 }
