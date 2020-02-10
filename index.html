@@ -11,9 +11,17 @@
 		function start()
 		{
 			let script = Utils.getUrlParam('script');
+			if (!script) {
+				console.warn('No script.');
+				return;
+			}
+
 			$.getScript(script + '.js').done(function() {
 				const main = new Main();
 				main.init();
+			})
+			.fail(function() {
+				console.warn('Loading script failed.');
 			});
 		}
 

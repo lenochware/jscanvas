@@ -10,7 +10,13 @@ class Main extends NextGame {
 
 		this.selectedNode = null;
 
-		this.gridSize = 10;
+		this.view = {
+			offsetX: 0,
+			offsetY: 0,
+			scale: 1,
+			grid: 10
+		};
+
 	}
 
 	findNode(pos)
@@ -37,19 +43,25 @@ class Main extends NextGame {
 		this.kb.key = '';		
 	}
 
+	drawGrid()
+	{
+		let height = this.canvas.height();
+		let width = this.canvas.width();
+		for(let y = 0; y < height; y += this.view.grid) {
+			for(let x = 0; x < width; x += this.view.grid) {
+				this.canvas.pixel(x, y, '#006');
+			}
+		}		
+	}
+
 	update()
 	{
 		this.requestUpdate();
 
 		this.canvas.clear();
+		this.drawGrid();
 
-		let height = this.canvas.height();
-		let width = this.canvas.width();
-		for(let y = 0; y < height; y += this.gridSize) {
-			for(let x = 0; x < width; x += this.gridSize) {
-				this.canvas.pixel(x, y, '#006');
-			}
-		}
+
 
 		for (let s of this.shapes) {
 			s.draw(this.canvas);
@@ -57,8 +69,8 @@ class Main extends NextGame {
 		}
 
 		let cursor = {};
-		cursor.x = Math.round(this.mouse.x / this.gridSize) * this.gridSize;
-		cursor.y = Math.round(this.mouse.y / this.gridSize) * this.gridSize;
+		cursor.x = Math.round(this.mouse.x / this.view.grid) * this.view.grid;
+		cursor.y = Math.round(this.mouse.y / this.view.grid) * this.view.grid;
 		this.canvas.circle(cursor.x, cursor.y, 2, 'purple');
 
 		if (this.kb.key == 'l') this.addShape(new Line, cursor);
