@@ -22,6 +22,12 @@ class NextCanvas
 		return this;
 	}
 
+	setView(scale, offsetX = 0, offsetY = 0)
+	{
+		this.context.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+	};
+
+
 	width(num)
 	{
 		if (num) {
