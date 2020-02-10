@@ -7,12 +7,14 @@
 	<script src="Utils.js"></script>
 	<script src="NextCanvas.js"></script>
 	<script src="NextGame.js"></script>
-	<script src="cad.js"></script>
 	<script>
 		function start()
 		{
-			const main = new Main();
-			main.init();
+			let script = Utils.getUrlParam('script');
+			$.getScript(script + '.js').done(function() {
+				const main = new Main();
+				main.init();
+			});
 		}
 
 		$(document).ready(start);

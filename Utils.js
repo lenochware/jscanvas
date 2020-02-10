@@ -9,4 +9,14 @@ class Utils
 	{
 		return value.toFixed(precision);
 	}
+
+	static getUrlParam(name)
+	{
+		let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+		if (results == null) {
+			return null;
+		}
+
+		return decodeURI(results[1]) || 0;
+	}
 }
