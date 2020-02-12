@@ -10,12 +10,7 @@ class Main extends NextGame {
 
 		this.selectedNode = null;
 
-		this.view = {
-			offsetX: 0,
-			offsetY: 0,
-			scale: 1,
-			grid: 10
-		};
+		this.grid = 10;
 
 	}
 
@@ -47,8 +42,8 @@ class Main extends NextGame {
 	{
 		let height = this.canvas.height();
 		let width = this.canvas.width();
-		for(let y = 0; y < height; y += this.view.grid) {
-			for(let x = 0; x < width; x += this.view.grid) {
+		for(let y = 0; y < height; y += this.grid) {
+			for(let x = 0; x < width; x += this.grid) {
 				this.canvas.pixel(x, y, '#006');
 			}
 		}
@@ -58,7 +53,7 @@ class Main extends NextGame {
 	{
 		this.requestUpdate();
 
-		//this.canvas.setView(1);
+		this.canvas.applyTransform();
 		this.canvas.clear();
 		this.drawGrid();
 
@@ -68,8 +63,8 @@ class Main extends NextGame {
 		}
 
 		let cursor = {};
-		cursor.x = Math.round(this.mouse.x / this.view.grid) * this.view.grid;
-		cursor.y = Math.round(this.mouse.y / this.view.grid) * this.view.grid;
+		cursor.x = Math.round(this.mouse.x / this.grid) * this.grid;
+		cursor.y = Math.round(this.mouse.y / this.grid) * this.grid;
 		this.canvas.circle(cursor.x, cursor.y, 2, 'purple');
 
 		if (this.kb.key == 'l') this.addShape(new Line, cursor);

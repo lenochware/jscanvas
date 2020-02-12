@@ -6,6 +6,10 @@ class NextCanvas
 		this.element = document.getElementById(canvasId);
 		this.context = this.element.getContext('2d');
 		if (!this.context) throw Error('Canvas not found.');
+
+		this.offsetX = 0;
+		this.offsetY = 0;
+		this.scale = 1;
 	}
 
 	//this.context.save();
@@ -22,9 +26,9 @@ class NextCanvas
 		return this;
 	}
 
-	setView(scale, offsetX = 0, offsetY = 0)
+	applyTransform()
 	{
-		this.context.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+		this.context.setTransform(this.scale, 0, 0, this.scale, this.offsetX, this.offsetY);
 	};
 
 
