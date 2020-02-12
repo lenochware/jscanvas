@@ -4,7 +4,7 @@ class Main extends NextGame {
 	{
 		super.init();
 		this.canvas.width(800);
-		this.canvas.height(600);
+		this.canvas.height(600);		
 
 		this.shapes = [];
 
@@ -51,17 +51,16 @@ class Main extends NextGame {
 			for(let x = 0; x < width; x += this.view.grid) {
 				this.canvas.pixel(x, y, '#006');
 			}
-		}		
+		}
 	}
 
 	update()
 	{
 		this.requestUpdate();
 
+		//this.canvas.setView(1);
 		this.canvas.clear();
 		this.drawGrid();
-
-
 
 		for (let s of this.shapes) {
 			s.draw(this.canvas);
@@ -82,6 +81,8 @@ class Main extends NextGame {
 			this.selectedNode.x = cursor.x;
 			this.selectedNode.y = cursor.y;
 		}
+
+		//this.canvas.text(30, 30, 'red', JSON.stringify(this.mouse));
 
 
 		if(this.mouse.buttons) {
