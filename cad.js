@@ -10,8 +10,10 @@ class Main extends NextGame {
 
 		this.selectedNode = null;
 
-		this.grid = 10;
+		this.offsetX = 0;
+		this.offsetY = 0;
 
+		this.grid = 10;
 	}
 
 	findNode(pos)
@@ -63,27 +65,34 @@ class Main extends NextGame {
 		}
 
 		let cursor = {};
-		cursor.x = Math.round(this.mouse.x / this.grid) * this.grid;
-		cursor.y = Math.round(this.mouse.y / this.grid) * this.grid;
+		cursor.x = Math.round((this.mouse.x - this.offsetX) / this.grid) * this.grid;
+		cursor.y = Math.round((this.mouse.y - this.offsetY) / this.grid) * this.grid;
 		this.canvas.circle(cursor.x, cursor.y, 2, 'purple');
 
 		if (this.kb.key == 'l') this.addShape(new Line, cursor);
 		if (this.kb.key == 'c') this.addShape(new Circle, cursor);
 		if (this.kb.key == 'r') this.addShape(new Rect, cursor);
 		if (this.kb.key == 's') this.addShape(new Spline, cursor);
+		
+		if (this.kb.key == 'Escape') {
+			this.offsetX = this.offsetY = 0;
+			this.canvas.offsetX = this.canvas.offsetY = 0;
+			this.canvas.scale = 1;
+			this.kb.key = '';
+		};
 
 		if (this.selectedNode) {
 			this.selectedNode.x = cursor.x;
 			this.selectedNode.y = cursor.y;
 		}
 
-		//this.canvas.text(30, 30, 'red', JSON.stringify(this.mouse));
+		//this.canvas.text(30, 30, 'red', JSON.stringify(this.kb.key));
 
 
 		if(this.mouse.buttons) {
 			if (this.selectedNode) {
 				let s = this.selectedNode.shape;
-				this.selectedNode = this.selectedNode.shape.getNode(cursor);
+				this.selectedNode = s.getNode(cursor);
 				if (!this.selectedNode) s.color = 'green';
 			}
 			else {
@@ -92,6 +101,22 @@ class Main extends NextGame {
 			}
 
 			this.mouse.buttons = 0;
+		}
+
+		if (this.mouse.deltaY) {
+			this.canvas.scale *= (this.mouse.deltaY > 0? 0.95 : 1.05 );
+			this.mouse.deltaY = 0;
+		}
+
+		if (this.mouse.hold == this.MB_MIDDLE) {
+			this.canvas.offsetX = this.offsetX + this.mouse.offsetX;
+			this.canvas.offsetY = this.offsetY + this.mouse.offsetY;
+		}
+
+		if (this.mouse.release) {
+			this.offsetX = this.canvas.offsetX;
+			this.offsetY = this.canvas.offsetY;
+			this.mouse.release = 0;
 		}
 
 		this.time = this.now();
