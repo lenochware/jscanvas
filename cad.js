@@ -49,6 +49,9 @@ class Main extends NextGame {
 				this.canvas.pixel(x, y, '#006');
 			}
 		}
+
+		this.canvas.dashedLine(0, height / 2, width, height / 2, '#ccc');
+		this.canvas.dashedLine(width / 2, 0, width / 2, height, '#ccc');
 	}
 
 	update()
@@ -88,7 +91,7 @@ class Main extends NextGame {
 			this.selectedNode.y = cursor.y;
 		}
 
-		//this.canvas.text(30, 30, 'red', JSON.stringify(this.kb.key));
+		//this.canvas.text(30, 30, 'red', JSON.stringify(this.mouse.clickX));
 
 
 		if(this.mouse.buttons) {
