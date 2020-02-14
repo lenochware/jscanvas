@@ -65,19 +65,35 @@ class Shape
 		this.vy = 0;
 		this.decel = 0.1;
 
-		this.angle = 0;
+		this.angle = 1;
 	}
 
-	translate(x, y)
+	translate(nodes, x, y)
 	{
 		let output = [];
-		for(let i = 0; i < this.nodes.length; i += 2) {
-			output.push(this.nodes[i] + this.x);
-			output.push(this.nodes[i+1] + this.y);
+		for(let i = 0; i < nodes.length; i += 2) {
+			output.push(nodes[i] + x);
+			output.push(nodes[i+1] + y);
 		}
 
 		return output;
 	}
+
+	rotate(nodes, a)
+	{
+		let output = [];
+
+		for(let i = 0; i < nodes.length; i += 2) {
+			let x = this.nodes[i];
+			let y = this.nodes[i+1];
+
+			output.push(x * Math.cos(a) - y * Math.sin(a));
+			output.push(x * Math.sin(a) + y * Math.cos(a));
+		}
+
+		return output;
+	}
+
 
 	update()
 	{
@@ -96,6 +112,8 @@ class Shape
 		this.x = Utils.clamp(this.x, 0, canvas.width());
 		this.y = Utils.clamp(this.y, 0, canvas.height());
 
-		canvas.polygon(this.translate(this.x, this.y), this.color);
+		let nodes = this.translate(this.rotate(this.nodes, this.angle), this.x, this.y);
+
+		canvas.polygon(nodes, this.color);
 	}
 }
