@@ -4,6 +4,7 @@ class NextGame {
 	{
 		this.mouse = null;
 		this.kb = { key: ''};
+		this.kbmap = {};
 		this.canvas = new NextCanvas('canvas');
 		this.elapsedTime = 0;
 		this.time = this.now();
@@ -35,7 +36,14 @@ class NextGame {
 	{
 		$("body").on('keydown', (e) => {
 			this.kb = e;
+			this.kbmap[e.keyCode] = true;
 		});
+
+
+		$("body").on('keyup keydown', (e) => {
+			this.kbmap[e.key] = e.type == 'keydown';
+		});
+
 	}
 
 	initMouse()
