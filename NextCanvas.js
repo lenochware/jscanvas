@@ -26,6 +26,11 @@ class NextCanvas
 		return this;
 	}
 
+	resetTransform()
+	{
+		this.context.setTransform(1, 0, 0, 1, 0, 0);
+	}
+
 	applyTransform()
 	{
 		this.context.setTransform(this.scale, 0, 0, this.scale, this.offsetX, this.offsetY);

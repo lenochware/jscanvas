@@ -4,7 +4,7 @@ class Main extends NextGame {
 	{
 		super.init();
 		this.canvas.width(800);
-		this.canvas.height(600);		
+		this.canvas.height(600);
 
 		this.shapes = [];
 
@@ -55,8 +55,10 @@ class Main extends NextGame {
 	{
 		this.requestUpdate();
 
-		this.canvas.applyTransform();
+		this.canvas.resetTransform();
 		this.canvas.clear();
+		this.canvas.applyTransform();
+		//this.canvas.context.rotate(40 * Math.PI / 180); DOMMatrix!
 		this.drawGrid();
 
 		for (let s of this.shapes) {
@@ -65,8 +67,8 @@ class Main extends NextGame {
 		}
 
 		let cursor = {};
-		cursor.x = Math.round((this.mouse.x - this.offsetX) / this.grid) * this.grid;
-		cursor.y = Math.round((this.mouse.y - this.offsetY) / this.grid) * this.grid;
+		cursor.x = Math.round((this.mouse.x - this.offsetX) / this.canvas.scale / this.grid) * this.grid;
+		cursor.y = Math.round((this.mouse.y - this.offsetY) / this.canvas.scale / this.grid) * this.grid;
 		this.canvas.circle(cursor.x, cursor.y, 2, 'purple');
 
 		if (this.kb.key == 'l') this.addShape(new Line, cursor);

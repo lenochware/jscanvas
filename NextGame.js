@@ -76,8 +76,8 @@ class NextGame {
     let scaleY = this.canvas.height() / this.canvas.screenHeight();
     let m = this.mouse;
 		
-		m.x = Math.floor(e.offsetX * scaleX / this.canvas.scale);
-		m.y = Math.floor(e.offsetY * scaleY / this.canvas.scale);
+		m.x = Math.floor(e.offsetX * scaleX);
+		m.y = Math.floor(e.offsetY * scaleY);
 
 		if (m.hold) {
 			m.offsetX = m.x - m.clickX;
