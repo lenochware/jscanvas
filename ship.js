@@ -84,12 +84,18 @@ class Shape
 		this.vx += -Math.sign(this.vx) * this.decel;
 		this.vy += -Math.sign(this.vy) * this.decel;
 
+		if (Math.abs(this.vx) < 0.1) this.vx = 0;
+		if (Math.abs(this.vy) < 0.1) this.vy = 0;
+
 		this.x += this.vx;
 		this.y += this.vy;
 	}
 
 	draw(canvas)
 	{
+		this.x = Utils.clamp(this.x, 0, canvas.width());
+		this.y = Utils.clamp(this.y, 0, canvas.height());
+
 		canvas.polygon(this.translate(this.x, this.y), this.color);
 	}
 }

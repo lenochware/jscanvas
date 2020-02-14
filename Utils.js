@@ -10,6 +10,11 @@ class Utils
 		return value.toFixed(precision);
 	}
 
+	static clamp(x, a, b)
+	{
+		return Math.max(a, Math.min(x, b));
+	}
+
 	static getUrlParam(name)
 	{
 		let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
