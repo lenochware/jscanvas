@@ -7,6 +7,7 @@ class Main extends NextGame {
 		this.canvas.height(600);
 
 		this.ship = new Shape(300, 300, [10, 0, -10, 10, -10, -10]);
+		this.particles = new Particles(this.canvas);
 	}
 
 	update()
@@ -34,8 +35,10 @@ class Main extends NextGame {
 		this.ship.angle = Math.atan2(this.mouse.y - this.ship.y, this.mouse.x - this.ship.x);
 		this.ship.update();
 		this.ship.draw(this.canvas);
+		this.particles.update();
 
 		if(this.mouse.buttons) {
+			this.particles.add(new Particle(this.ship.x, this.ship.y, 10, this.ship.angle, 'red'));
 			this.mouse.buttons = 0;
 		}
 
@@ -43,6 +46,55 @@ class Main extends NextGame {
 	}
 }
 
+class Particle
+{
+	constructor(x, y, v, angle, color)
+	{
+		this.color = color;
+		this.x = x;
+		this.y = y;
+		this.dx = Math.cos(angle);
+		this.dy = Math.sin(angle);
+		this.decel = 0;
+		this.v = v;
+		this.dead = false;
+	}
+
+	update()
+	{
+		if (this.dead) return;
+		this.x += this.dx * this.v;
+		this.y += this.dy * this.v;
+	}
+
+	draw(canvas)
+	{
+		if (this.dead) return;
+		canvas.rectf(this.x, this.y, 5, 5, this.color);
+	}
+}
+
+class Particles
+{
+	constructor(canvas)
+	{
+		this.data = [];
+		this.canvas = canvas;
+	}
+
+	update()
+	{
+		for(let p of this.data) {
+			p.update();
+			p.draw(this.canvas);
+		}
+	}
+
+	add(p)
+	{
+		this.data.push(p);
+	}
+}
 
 class Shape
 {
