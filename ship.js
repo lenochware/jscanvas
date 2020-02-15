@@ -6,7 +6,7 @@ class Main extends NextGame {
 		this.canvas.width(800);
 		this.canvas.height(600);
 
-		this.ship = new Shape(300, 300, [0, -10, -10, 10, 10, 10]);
+		this.ship = new Shape(300, 300, [10, 0, -10, 10, -10, -10]);
 	}
 
 	update()
@@ -15,12 +15,6 @@ class Main extends NextGame {
 
 		this.canvas.clear();
 		
-		// if (this.kb.key == 'Escape') {
-		// 	this.kb.key = '';
-		// };
-
-		//this.canvas.text(30, 30, 'red', JSON.stringify(this.kbmap));
-
 		if (this.kbmap['ArrowLeft']) {
 			this.ship.vx -= 0.2;
 		}
@@ -37,12 +31,9 @@ class Main extends NextGame {
 			this.ship.vy += 0.2;
 		}
 
-		this.kb.key = '';
-
-
+		this.ship.angle = Math.atan2(this.mouse.y - this.ship.y, this.mouse.x - this.ship.x);
 		this.ship.update();
 		this.ship.draw(this.canvas);
-
 
 		if(this.mouse.buttons) {
 			this.mouse.buttons = 0;

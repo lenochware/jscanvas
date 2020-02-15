@@ -234,6 +234,22 @@ class NextCanvas
 
 	polygon(points, style)
 	{
+		this.context.strokeStyle = style;		
+		this.context.beginPath();
+		this.context.moveTo(points[0], points[1]);
+
+		for(let i = 2; i < points.length; i += 2) {
+			this.context.lineTo(points[i], points[i + 1]);
+		}
+	
+		this.context.closePath();
+		this.context.stroke();
+
+		return this;
+	}
+
+	polygonf(points, style)
+	{
 		this.context.fillStyle = style;		
 		this.context.beginPath();
 		this.context.moveTo(points[0], points[1]);
