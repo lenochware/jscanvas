@@ -38,7 +38,7 @@ class Main extends NextGame {
 		this.particles.update();
 
 		if(this.mouse.buttons) {
-			this.particles.add(new Particle(this.ship.x, this.ship.y, 10, this.ship.angle, 'red'));
+			this.particles.add(new Particle(this.ship.x, this.ship.y, 5, this.ship.angle, 'red'));
 			this.mouse.buttons = 0;
 		}
 
@@ -65,12 +65,17 @@ class Particle
 		if (this.dead) return;
 		this.x += this.dx * this.v;
 		this.y += this.dy * this.v;
+
 	}
 
 	draw(canvas)
 	{
 		if (this.dead) return;
 		canvas.rectf(this.x, this.y, 5, 5, this.color);
+
+		if (this.x < 0 || this.y < 0 || this.x > canvas.width() || this.y > canvas.height()) {
+			this.dead = true;
+		}
 	}
 }
 
@@ -80,14 +85,27 @@ class Particles
 	{
 		this.data = [];
 		this.canvas = canvas;
+		this.deadCount = 0;
 	}
 
 	update()
 	{
 		for(let p of this.data) {
+			if (p.dead) continue;
 			p.update();
 			p.draw(this.canvas);
+			if (p.dead) this.deadCount++;
 		}
+
+		if (this.data.length > 10 && this.deadCount > 5) {
+			this.cleanUp();
+		}
+	}
+
+	cleanUp()
+	{
+		this.data = this.data.filter(p => p.dead == false);
+		console.log('cleanUp', this.data.length);
 	}
 
 	add(p)
