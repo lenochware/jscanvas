@@ -8,6 +8,9 @@ class Main extends NextGame {
 
 		this.ship = new Shape(300, 300, [10, 0, -10, 10, -10, -10]);
 		this.particles = new Particles(this.canvas);
+		this.enemies = new Particles(this.canvas);
+
+		this.enemies.add(new Enemy(50,50, 1, 1, 'white'));
 	}
 
 	update()
@@ -36,6 +39,7 @@ class Main extends NextGame {
 		this.ship.update();
 		this.ship.draw(this.canvas);
 		this.particles.update();
+		this.enemies.update();
 
 		if(this.mouse.buttons) {
 			this.particles.add(new Particle(this.ship.x, this.ship.y, 5, this.ship.angle, 'red'));
@@ -77,6 +81,19 @@ class Particle
 			this.dead = true;
 		}
 	}
+}
+
+class Enemy extends Particle
+{
+	draw(canvas)
+	{
+		if (this.dead) return;
+		canvas.rect(this.x, this.y, 40, 40, this.color);
+
+		if (this.x < 0 ||  this.x > canvas.width()) this.dx *= -1;
+		if (this.y < 0 || this.y > canvas.height()) this.dy *= -1;
+	}
+
 }
 
 class Particles
