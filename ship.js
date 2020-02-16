@@ -45,9 +45,14 @@ class Main extends NextGame {
 		this.spaceObjects.update();
 		this.particles.update();
 
+		this.spaceObjects.collides(this.particles);
+		this.spaceObjects.collides(this.spaceObjects);
+
 		if(this.mouse.buttons) {
 			let p = new Particle(this.canvas, this.ship.x, this.ship.y);
 			p.setVelocity(5, this.ship.angle);
+			p.x += 4*p.vx;
+			p.y += 4*p.vy;
 			p.color = 'red';
 			this.particles.add(p);
 			this.mouse.buttons = 0;
@@ -169,6 +174,7 @@ class Ship extends Mob
 		super(canvas, x, y, nodes);
 		this.decel = 0.1;
 		this.angle = 1;
+		this.size = 15;
 	}
 
 	update()
@@ -189,6 +195,13 @@ class Ship extends Mob
 
 class Enemy extends Particle
 {
+
+	constructor(canvas, x, y, nodes)
+	{
+		super(canvas,x, y);
+		this.size = 20;
+	}
+
 	update()
 	{
 		let off = this.outOfScreen();
@@ -203,7 +216,7 @@ class Enemy extends Particle
 
 	draw()
 	{
-		this.canvas.rect(this.x, this.y, 40, 40, this.color);
+		this.canvas.rect(this.x - 20, this.y -20, 40, 40, this.color);
 	}
 
 }
