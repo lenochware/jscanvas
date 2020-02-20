@@ -6,7 +6,7 @@ class Main extends NextGame {
 		this.canvas.width(800);
 		this.canvas.height(600);
 
-		this.ship = new Ship(this.canvas, 300, 300, [10, 0, -10, 10, -10, -10]);
+		this.ship = new Ship(this, 300, 300, [10, 0, -10, 10, -10, -10]);
 
 		this.spaceObjects = new Group();
 		this.particles = new Group();
@@ -49,12 +49,7 @@ class Main extends NextGame {
 		this.spaceObjects.collides(this.spaceObjects);
 
 		if(this.mouse.buttons) {
-			let p = new Particle(this.canvas, this.ship.x, this.ship.y);
-			p.setVelocity(5, this.ship.angle);
-			p.x += 4*p.vx;
-			p.y += 4*p.vy;
-			p.color = 'red';
-			this.particles.add(p);
+			this.ship.fire();
 			this.mouse.buttons = 0;
 		}
 
@@ -124,9 +119,10 @@ class Particle
 class Mob extends Particle
 {
 
-	constructor(canvas, x, y, nodes)
+	constructor(game, x, y, nodes)
 	{
-		super(canvas,x, y);
+		super(game.canvas,x, y);
+		this.game = game;
 		this.nodes = nodes;
 	}
 
@@ -169,12 +165,23 @@ class Mob extends Particle
 
 class Ship extends Mob
 {
-	constructor(canvas, x, y, nodes)
+	constructor(game, x, y, nodes)
 	{
-		super(canvas, x, y, nodes);
+		super(game, x, y, nodes);
 		this.decel = 0.1;
 		this.angle = 1;
 		this.size = 15;
+	}
+
+	fire()
+	{
+		let p = new Particle(this.canvas, this.x, this.y);
+		p.setVelocity(5, this.angle);
+		p.x += 4*p.vx;
+		p.y += 4*p.vy;
+		p.color = 'red';
+		this.game.particles.add(p);
+
 	}
 
 	update()
@@ -246,6 +253,7 @@ class Group
 	{
 		for(let m of this.members) {
 			for(let n of group.members) {
+				if (!m.alive || !n.alive) continue;
 				if (m.collides(n)) {
 					m.hit(n);
 					n.hit(m);
