@@ -8,12 +8,12 @@ class Main extends NextGame {
 
 		this.ship = new Ship(this, 300, 300, [10, 0, -10, 10, -10, -10]);
 
-		this.spaceObjects = new Group();
-		this.particles = new Group();
+		this.spaceObjects = new Group(this);
+		this.particles = new Group(this);
 
 		this.spaceObjects.add(this.ship);
 		
-		let mob = new Enemy(this.canvas, 100, 100);
+		let mob = new Enemy(this, 100, 100, []);
 		mob.setVelocity(1,3);
 		this.spaceObjects.add(mob);
 	}
@@ -42,8 +42,8 @@ class Main extends NextGame {
 
 		this.ship.angle = Math.atan2(this.mouse.y - this.ship.y, this.mouse.x - this.ship.x);
 
-		this.spaceObjects.update();
-		this.particles.update();
+		this.spaceObjects.draw();
+		this.particles.draw();
 
 		this.spaceObjects.collides(this.particles);
 		this.spaceObjects.collides(this.spaceObjects);
@@ -57,20 +57,42 @@ class Main extends NextGame {
 	}
 }
 
-class Particle
+class Vobj
 {
-	constructor(canvas, x, y)
+	constructor(x, y)
 	{
-		this.canvas = canvas;
 		this.x = x;
 		this.y = y;
+
 		this.vx = 0;
 		this.vy = 0;
 		this.ax = 0;
 		this.ay = 0;
+		
 		this.color = 'white';
 		this.size = 5;
-		this.alive = true;
+		this.dead = false;
+	}
+
+	update(game) {}
+	draw(canvas) {}
+
+	collides(vobj)
+	{
+		if (this == vobj) return false;
+		return ((vobj.x - this.x) ** 2 + (vobj.y - this.y) ** 2 <= (vobj.size + this.size) **2);
+	}
+
+	hit(source)
+	{
+		this.dead = true;
+	}
+
+	outOfScreen(canvas)
+	{
+		if (this.x < 0 || this.x > canvas.width()) return 1;
+		if (this.y < 0 || this.y > canvas.height()) return 2;
+		return 0;
 	}
 
 	setVelocity(size, angle)
@@ -79,49 +101,81 @@ class Particle
 		this.vy = size * Math.sin(angle);
 	}
 
-	update()
+}
+
+class Group
+{
+	constructor(game)
 	{
-		if (this.outOfScreen()) this.alive = false;
-		if (!this.alive) return;
+		this.game = game;
+		this.members = [];
+		this.deadCount = 0;
+	}
+
+	draw()
+	{
+		for(let m of this.members) {
+			if (m.dead) continue;
+			m.update(this.game);
+			m.draw(this.game.canvas);
+			if (m.dead) this.deadCount++;
+		}
+
+		if (this.members.length > 10 && this.deadCount > 5) {
+			this.cleanUp();
+		}
+	}
+
+	collides(group)
+	{
+		for(let m of this.members) {
+			for(let n of group.members) {
+				if (m.dead || n.dead) continue;
+				if (m.collides(n)) {
+					m.hit(n);
+					n.hit(m);
+				}
+			}
+		}
+	}
+
+	cleanUp()
+	{
+		this.members = this.members.filter(p => !p.dead);
+		console.log('cleanUp', this.members.length);
+	}
+
+	add(m)
+	{
+		this.members.push(m);
+	}
+}
+
+class Particle extends Vobj
+{
+	update(game)
+	{
+		if (this.outOfScreen(game.canvas)) this.dead = true;
+		if (this.dead) return;
 
 		this.vx += this.ax;
 		this.vy += this.ay;
 		this.x += this.vx;
 		this.y += this.vy;
-
-		this.draw();
 	}
 
-	collides(mob)
+	draw(canvas)
 	{
-		if (this == mob) return false;
-		return ((mob.x - this.x) ** 2 + (mob.y - this.y) ** 2 <= (mob.size + this.size) **2);
-	}
-
-	outOfScreen()
-	{
-		if (this.x < 0 ||  this.x > this.canvas.width()) return 1;
-		if (this.y < 0 || this.y > this.canvas.height()) return 2;
-		return 0;
-	}
-
-	hit(source)
-	{
-		this.alive = false;
-	}
-
-	draw()
-	{
-		this.canvas.rectf(this.x, this.y, this.size, this.size, this.color);
+		canvas.rectf(this.x, this.y, this.size, this.size, this.color);
 	}
 }
 
-class Mob extends Particle
+class Sprite extends Vobj
 {
 
 	constructor(game, x, y, nodes)
 	{
-		super(game.canvas,x, y);
+		super(x, y);
 		this.game = game;
 		this.nodes = nodes;
 	}
@@ -152,22 +206,23 @@ class Mob extends Particle
 		return output;
 	}
 
-	draw()
+	draw(canvas)
 	{
-		this.x = Utils.clamp(this.x, 0, this.canvas.width());
-		this.y = Utils.clamp(this.y, 0, this.canvas.height());
+		this.x = Utils.clamp(this.x, 0, canvas.width());
+		this.y = Utils.clamp(this.y, 0, canvas.height());
 
 		let nodes = this.translate(this.rotate(this.nodes, this.angle), this.x, this.y);
 
-		this.canvas.polygon(nodes, this.color);
-	}	
+		canvas.polygon(nodes, this.color);
+	}
 }
 
-class Ship extends Mob
+class Ship extends Sprite
 {
 	constructor(game, x, y, nodes)
 	{
 		super(game, x, y, nodes);
+
 		this.decel = 0.1;
 		this.angle = 1;
 		this.size = 15;
@@ -175,101 +230,55 @@ class Ship extends Mob
 
 	fire()
 	{
-		let p = new Particle(this.canvas, this.x, this.y);
+		let p = new Particle(this.x, this.y);
 		p.setVelocity(5, this.angle);
-		p.x += 4*p.vx;
-		p.y += 4*p.vy;
-		p.color = 'red';
-		this.game.particles.add(p);
 
+		p.x += 4 * p.vx;
+		p.y += 4 * p.vy;
+		p.color = 'red';
+
+		this.game.particles.add(p);
 	}
 
-	update()
+	update(game)
 	{
 		this.vx += -Math.sign(this.vx) * this.decel;
 		this.vy += -Math.sign(this.vy) * this.decel;
 
-		let off = this.outOfScreen();
+		let off = this.outOfScreen(game.canvas);
+
 		if (off == 1) this.vx *= -1;
 		if (off == 2) this.vy *= -1;
 
 		this.x += this.vx;
 		this.y += this.vy;
-
-		this.draw();
 	}
 }
 
-class Enemy extends Particle
+class Enemy extends Sprite
 {
 
-	constructor(canvas, x, y, nodes)
+	constructor(sprite, x, y, nodes)
 	{
-		super(canvas,x, y);
+		super(sprite, x, y, nodes);
 		this.size = 20;
 	}
 
-	update()
+	update(game)
 	{
-		let off = this.outOfScreen();
+		let off = this.outOfScreen(game.canvas);
+
 		if (off == 1) this.vx *= -1;
 		if (off == 2) this.vy *= -1;
 
 		this.x += this.vx;
 		this.y += this.vy;
-
-		this.draw();
 	}
 
-	draw()
+	draw(canvas)
 	{
-		this.canvas.rect(this.x - 20, this.y -20, 40, 40, this.color);
+		canvas.rect(this.x - 20, this.y -20, 40, 40, this.color);
 	}
 
 }
 
-class Group
-{
-	constructor()
-	{
-		this.members = [];
-		this.deadCount = 0;
-	}
-
-	update()
-	{
-		for(let m of this.members) {
-			if (!m.alive) continue;
-			m.update();
-			if (!m.alive) this.deadCount++;
-		}
-
-		if (this.members.length > 10 && this.deadCount > 5) {
-			this.cleanUp();
-		}
-	}
-
-	collides(group)
-	{
-		for(let m of this.members) {
-			for(let n of group.members) {
-				if (!m.alive || !n.alive) continue;
-				if (m.collides(n)) {
-					m.hit(n);
-					n.hit(m);
-				}
-			}
-		}
-	}
-
-	cleanUp()
-	{
-		this.members = this.members.filter(p => p.alive);
-		console.log('cleanUp', this.members.length);
-	}
-
-	add(m)
-	{
-		this.members.push(m);
-	}
-}
