@@ -17,8 +17,8 @@
 			}
 
 			$.getScript(script + '.js').done(function() {
-				const main = new Main();
-				main.init();
+				const game = new Main();
+				game.start();
 			})
 			.fail(function() {
 				console.warn('Loading script failed.');

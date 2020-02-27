@@ -12,6 +12,37 @@ class NextGame {
 		this.MB_LEFT = 1;
 		this.MB_RIGHT = 2;
 		this.MB_MIDDLE = 4;
+
+		this.assets = {};
+	}
+
+	start()
+	{
+		this.preload();
+		if (Utils.isEmpty(this.assets)) this.init();
+		this.loadAssets(() => this.init());
+	}
+
+	preload()
+	{
+	}
+
+	loadImage(id, url)
+	{
+		this.assets[id] = {id, url, type: 'image'};
+	}
+
+	loadAssets(callback)
+	{
+		let assetKeys = Object.keys(this.assets);
+	  let count = assetKeys.length;
+	  let onload = function() { if (--count == 0) callback(); };
+
+	  for(let key of assetKeys) {
+	    this.assets[key].data = new Image();
+	    this.assets[key].data.addEventListener('load', onload);
+	    this.assets[key].data.src = this.assets[key].url;
+	  }
 	}
 
 	init()
