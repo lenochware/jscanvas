@@ -44,7 +44,7 @@ class Main extends NextGame {
 			this.mouse.deltaY = 0;
 		}		
 
-		if (this.mouse.hold == this.MB_MIDDLE) {
+		if (this.mouse.hold == this.MB_LEFT) {
 			this.canvas.offsetX = this.offsetX + this.mouse.offsetX;
 			this.canvas.offsetY = this.offsetY + this.mouse.offsetY;
 		}
