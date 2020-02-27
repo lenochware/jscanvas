@@ -18,6 +18,7 @@ class Main extends NextGame {
 		{
 			for (let x = 0; x < im.width; x++)
 			{
+				Utils.seed = y * im.width + x;
 				im.putPixel(x, y, this.randomPixel());
 			}
 		}
