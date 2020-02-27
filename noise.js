@@ -11,7 +11,7 @@ class Main extends NextGame {
 	{
 		let im = this.canvasImage;
 
-		//console.log(this.elapsedTime);
+		//Utils.seed = 123456;
 
 
 		for (let y = 0; y < im.height; y++)
@@ -37,9 +37,9 @@ class Main extends NextGame {
 	randomPixel()
 	{
 		return [
-			Utils.random(200,255),
-			Utils.random(50,200),
-			Utils.random(50,100),
+			Utils.seedRandom(200,255),
+			Utils.seedRandom(50,200),
+			Utils.seedRandom(50,100),
 			255
 		];
 	}

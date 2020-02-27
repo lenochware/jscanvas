@@ -5,6 +5,17 @@ class Utils
 		return Math.floor(Math.random() * (max - min) + min);
 	}
 
+	static seedRandInt()
+	{
+		Utils.seed = (Utils.seed * 185852 + 1) % 34359738337;
+		return Utils.seed;
+	}
+
+	static seedRandom(min, max)
+	{
+		return (Utils.seedRandInt() % (max - min)) + min;
+	}
+
 	static round(value, precision)
 	{
 		return value.toFixed(precision);
@@ -34,3 +45,5 @@ class Utils
 		return decodeURI(results[1]) || 0;
 	}
 }
+
+Utils.seed = Date.now();
