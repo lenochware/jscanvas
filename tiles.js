@@ -27,8 +27,12 @@ class Main extends NextGame {
 
 		for (let y = 0; y < 20; y++) {
 			for(let x = 0; x < 40; x++) {
-				Utils.seed = y * 40 + x;
-				tileSet.draw(Utils.seedRandom(1, tileSet.size - 1), x * tileSet.tileWidth, y * tileSet.tileHeight);
+				
+				let worldX = x - Math.floor(this.canvas.offsetX / tileSet.tileWidth / this.canvas.scale) - 1;
+				let worldY = y - Math.floor(this.canvas.offsetY / tileSet.tileHeight / this.canvas.scale) - 1;
+
+				Utils.seed = (worldY << 16) + worldX;
+				tileSet.draw(Utils.seedRandom(1, tileSet.size - 1), worldX * tileSet.tileWidth, worldY * tileSet.tileHeight);
 			}
 		}
 
@@ -53,7 +57,16 @@ class Main extends NextGame {
 			this.offsetX = this.canvas.offsetX;
 			this.offsetY = this.canvas.offsetY;
 			this.mouse.release = 0;
-		}		
+		}
+
+		let worldX =  - Math.floor(this.canvas.offsetX / tileSet.tileWidth / this.canvas.scale) - 1;
+		let worldY =  - Math.floor(this.canvas.offsetY / tileSet.tileHeight / this.canvas.scale) - 1;
+
+		this.canvas.resetTransform();
+		
+		this.canvas.text(10, 20, 'white', worldX + ', ' + worldY + ', ' + ((worldY << 16) + worldX));
+		//this.canvas.text(10, 20, 'white', this.canvas.offsetX + ', ' + this.canvas.offsetY + ', ' + this.canvas.scale);
+
 		
 		this.time = this.now();
 	}
