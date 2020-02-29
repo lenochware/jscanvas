@@ -11,6 +11,11 @@ class Utils
 		return Utils.seed;
 	}
 
+	static seedRandFloat()
+	{
+		return Utils.seedRandInt() / 34359738337;
+	}
+
 
 	static seedRandInt2()
 	{
