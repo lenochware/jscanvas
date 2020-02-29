@@ -10,9 +10,13 @@
 	<script>
 		function start()
 		{
+			jQuery.ajaxPrefilter( "script", function( s ) {
+			    s.crossDomain = true;
+			});
+
 			let script = Utils.getUrlParam('script');
 			if (!script) {
-				console.warn('No script.');
+				alert('Usage: index.html?script=script-name');
 				return;
 			}
 
@@ -47,6 +51,6 @@
 	</style>
 </head>
 <body>
-	<canvas id="canvas" class="pixelated" width="400" height="200"></canvas>
+	<canvas id="canvas" class="pixelated"></canvas>
 </body>
 </html>
