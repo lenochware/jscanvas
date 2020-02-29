@@ -8,6 +8,7 @@ class Main extends NextGame {
 		this.canvas.width(800);
 		this.canvas.height(600);
 		this.seed = Date.now();
+		this.offset = 0;
 	}
 
 	preload()
@@ -21,16 +22,25 @@ class Main extends NextGame {
 
 		let base = 300;
 		let width = this.canvas.width();
-		Utils.seed = this.seed;
+		//Utils.seed = this.seed;
 
-		let y = 200;
+		//if (this.time % 60) this.offset++;
+
+		let y = 0;
+
+		// for (let x = 0; x < width; x++)
+		// {
+		// 	//let y = Utils.seedRandFloat() * base;
+		// 	y += Utils.seedRandom(-3,4);
+		// 	this.canvas.line(x, y, x, base, y>base? 'blue':'lime');
+		// }
 
 		for (let x = 0; x < width; x++)
 		{
-			//let y = Utils.seedRandFloat() * base;
-			y += Utils.seedRandom(-3,4);
+			y = base - this.sum(x + this.offset);
 			this.canvas.line(x, y, x, base, y>base? 'blue':'lime');
 		}
+
 
 		if (this.kb.key == 'n') {
 			this.seed = Date.now();
@@ -41,5 +51,16 @@ class Main extends NextGame {
 		}
 		
 		this.time = this.now();
+	}
+
+	sum(x)
+	{
+		let y = 0;
+		for (let i = -16; i <= 16; i++)
+		{
+			Utils.seed = x + i;
+			y += Utils.seedRandom(0,8);
+		}
+		return y;
 	}
 }
