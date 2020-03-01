@@ -67,19 +67,20 @@ class Utils
 
 Utils.seed = Date.now();
 
+//From https://p5js.org/
 class Perlin
 {
 	constructor()
 	{
-		this.data = this.create_random_data(4095);
+		this.data = this.create_random_data(4096);
 
 		this.octaves = 4;
 		this.amp_falloff = 0.5;
 
-		this.PERLIN_YWRAPB = 4;
-		this.PERLIN_YWRAP = 1 << this.PERLIN_YWRAPB;
-		this.PERLIN_ZWRAPB = 8;
-		this.PERLIN_ZWRAP = 1 << this.PERLIN_ZWRAPB;
+		this.YWRAPB = 4;
+		this.YWRAP = 1 << this.YWRAPB;
+		this.ZWRAPB = 8;
+		this.ZWRAP = 1 << this.ZWRAPB;
 	}
 
 	scaled_cosine(i) 
@@ -89,8 +90,8 @@ class Perlin
 
 	create_random_data(size)
 	{
-    let data = new Array(size + 1);
-    for (let i = 0; i < size + 1; i++) {
+    let data = new Array(size);
+    for (let i = 0; i < size; i++) {
       data[i] = Math.random();
     }
 
@@ -122,31 +123,31 @@ class Perlin
 
 	  let n1, n2, n3;
 
-	  let size = this.data.length;
+	  let size = this.data.length - 1;
 
-	  for (let o = 0; o < this.perlin_octaves; o++) {
-	    let of = xi + (yi << this.PERLIN_YWRAPB) + (zi << this.PERLIN_ZWRAPB);
+	  for (let o = 0; o < this.octaves; o++) {
+	    let of = xi + (yi << this.YWRAPB) + (zi << this.ZWRAPB);
 
 	    rxf = this.scaled_cosine(xf);
 	    ryf = this.scaled_cosine(yf);
 
 	    n1 = this.data[of & size];
 	    n1 += rxf * (this.data[(of + 1) & size] - n1);
-	    n2 = this.data[(of + this.PERLIN_YWRAP) & size];
-	    n2 += rxf * (this.data[(of + this.PERLIN_YWRAP + 1) & size] - n2);
+	    n2 = this.data[(of + this.YWRAP) & size];
+	    n2 += rxf * (this.data[(of + this.YWRAP + 1) & size] - n2);
 	    n1 += ryf * (n2 - n1);
 
-	    of += this.PERLIN_ZWRAP;
+	    of += this.ZWRAP;
 	    n2 = this.data[of & size];
 	    n2 += rxf * (this.data[(of + 1) & size] - n2);
-	    n3 = this.data[(of + this.PERLIN_YWRAP) & size];
-	    n3 += rxf * (this.data[(of + this.PERLIN_YWRAP + 1) & size] - n3);
+	    n3 = this.data[(of + this.YWRAP) & size];
+	    n3 += rxf * (this.data[(of + this.YWRAP + 1) & size] - n3);
 	    n2 += ryf * (n3 - n2);
 
 	    n1 += this.scaled_cosine(zf) * (n2 - n1);
 
 	    r += n1 * ampl;
-	    ampl *= this.perlin_amp_falloff;
+	    ampl *= this.amp_falloff;
 	    xi <<= 1;
 	    xf *= 2;
 	    yi <<= 1;

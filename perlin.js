@@ -9,7 +9,6 @@ class Main extends NextGame {
 		this.canvas.height(600);
 		this.seed = Date.now();
 		this.offset = 0;
-		console.log(Utils.perlin.noise(0.1));
 	}
 
 	preload()
@@ -25,21 +24,16 @@ class Main extends NextGame {
 		let width = this.canvas.width();
 		//Utils.seed = this.seed;
 
-		if (this.kb.key != 'p') this.offset++;
+		if (this.kb.key != 'p') this.offset += 0.01;
 
 		let y = 0;
 
-		// for (let x = 0; x < width; x++)
-		// {
-		// 	//let y = Utils.seedRandFloat() * base;
-		// 	y += Utils.seedRandom(-3,4);
-		// 	this.canvas.line(x, y, x, base, y>base? 'blue':'lime');
-		// }
-
+		let xoff = 0;
 		for (let x = 0; x < width; x++)
 		{
-			y = base - this.sum(x + this.offset);
+			y = Math.floor(base - Utils.perlin.noise(this.offset + xoff) * 200);
 			this.canvas.line(x, y, x, base, y>base? 'blue':'lime');
+			xoff += 0.01;
 		}
 
 
@@ -52,16 +46,5 @@ class Main extends NextGame {
 		}
 		
 		this.time = this.now();
-	}
-
-	sum(x)
-	{
-		let y = 0;
-		for (let i = -16; i <= 16; i++)
-		{
-			Utils.seed = x + i;
-			y += Utils.seedRandom(-4,8);
-		}
-		return y;
 	}
 }
