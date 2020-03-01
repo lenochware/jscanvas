@@ -9,6 +9,7 @@ class Main extends NextGame {
 		this.canvas.height(600);
 		this.seed = Date.now();
 		this.offset = 0;
+		console.log(Utils.perlin.noise(0.1));
 	}
 
 	preload()
