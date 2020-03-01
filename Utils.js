@@ -66,3 +66,9 @@ class Utils
 }
 
 Utils.seed = Date.now();
+
+Utils.perlin = {
+	noise: function(x) {
+		alert('aa');
+	}
+}

@@ -24,7 +24,7 @@ class Main extends NextGame {
 		let width = this.canvas.width();
 		//Utils.seed = this.seed;
 
-		//if (this.time % 60) this.offset++;
+		if (this.kb.key != 'p') this.offset++;
 
 		let y = 0;
 
@@ -59,7 +59,7 @@ class Main extends NextGame {
 		for (let i = -16; i <= 16; i++)
 		{
 			Utils.seed = x + i;
-			y += Utils.seedRandom(0,8);
+			y += Utils.seedRandom(-4,8);
 		}
 		return y;
 	}
