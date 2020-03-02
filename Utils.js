@@ -48,10 +48,10 @@ class Utils
 	static isEmpty(input)
 	{
 		 if (typeof input === 'array') {
-		    return input.length === 0;
-		  }
+				return input.length === 0;
+			}
 
-		  return !input || Object.keys(input).length === 0;
+			return !input || Object.keys(input).length === 0;
 	}
 
 	static getUrlParam(name)
@@ -90,85 +90,85 @@ class Perlin
 
 	create_random_data(size)
 	{
-    let data = new Array(size);
-    for (let i = 0; i < size; i++) {
-      data[i] = Math.random();
-    }
+		let data = new Array(size);
+		for (let i = 0; i < size; i++) {
+			data[i] = Math.random();
+		}
 
-    return data;
+		return data;
 	}
 
 	noise(x, y = 0, z = 0)
 	{
-	  if (x < 0) {
-	    x = -x;
-	  }
-	  if (y < 0) {
-	    y = -y;
-	  }
-	  if (z < 0) {
-	    z = -z;
-	  }
+		if (x < 0) {
+			x = -x;
+		}
+		if (y < 0) {
+			y = -y;
+		}
+		if (z < 0) {
+			z = -z;
+		}
 
-	  let xi = Math.floor(x),
-	    yi = Math.floor(y),
-	    zi = Math.floor(z);
-	  let xf = x - xi;
-	  let yf = y - yi;
-	  let zf = z - zi;
-	  let rxf, ryf;
+		let xi = Math.floor(x),
+			yi = Math.floor(y),
+			zi = Math.floor(z);
+		let xf = x - xi;
+		let yf = y - yi;
+		let zf = z - zi;
+		let rxf, ryf;
 
-	  let r = 0;
-	  let ampl = 0.5;
+		let r = 0;
+		let ampl = 0.5;
 
-	  let n1, n2, n3;
+		let n1, n2, n3;
 
-	  let size = this.data.length - 1;
+		let size = this.data.length - 1;
 
-	  for (let o = 0; o < this.octaves; o++) {
-	    let of = xi + (yi << this.YWRAPB) + (zi << this.ZWRAPB);
+		for (let o = 0; o < this.octaves; o++) {
+			let of = xi + (yi << this.YWRAPB) + (zi << this.ZWRAPB);
 
-	    rxf = this.scaled_cosine(xf);
-	    ryf = this.scaled_cosine(yf);
+			rxf = this.scaled_cosine(xf);
+			ryf = this.scaled_cosine(yf);
 
-	    n1 = this.data[of & size];
-	    n1 += rxf * (this.data[(of + 1) & size] - n1);
-	    n2 = this.data[(of + this.YWRAP) & size];
-	    n2 += rxf * (this.data[(of + this.YWRAP + 1) & size] - n2);
-	    n1 += ryf * (n2 - n1);
+			n1 = this.data[of & size];
+			n1 += rxf * (this.data[(of + 1) & size] - n1);
+			n2 = this.data[(of + this.YWRAP) & size];
+			n2 += rxf * (this.data[(of + this.YWRAP + 1) & size] - n2);
+			n1 += ryf * (n2 - n1);
 
-	    of += this.ZWRAP;
-	    n2 = this.data[of & size];
-	    n2 += rxf * (this.data[(of + 1) & size] - n2);
-	    n3 = this.data[(of + this.YWRAP) & size];
-	    n3 += rxf * (this.data[(of + this.YWRAP + 1) & size] - n3);
-	    n2 += ryf * (n3 - n2);
+			of += this.ZWRAP;
+			n2 = this.data[of & size];
+			n2 += rxf * (this.data[(of + 1) & size] - n2);
+			n3 = this.data[(of + this.YWRAP) & size];
+			n3 += rxf * (this.data[(of + this.YWRAP + 1) & size] - n3);
+			n2 += ryf * (n3 - n2);
 
-	    n1 += this.scaled_cosine(zf) * (n2 - n1);
+			n1 += this.scaled_cosine(zf) * (n2 - n1);
 
-	    r += n1 * ampl;
-	    ampl *= this.amp_falloff;
-	    xi <<= 1;
-	    xf *= 2;
-	    yi <<= 1;
-	    yf *= 2;
-	    zi <<= 1;
-	    zf *= 2;
+			r += n1 * ampl;
+			ampl *= this.amp_falloff;
+			xi <<= 1;
+			xf *= 2;
+			yi <<= 1;
+			yf *= 2;
+			zi <<= 1;
+			zf *= 2;
 
-	    if (xf >= 1.0) {
-	      xi++;
-	      xf--;
-	    }
-	    if (yf >= 1.0) {
-	      yi++;
-	      yf--;
-	    }
-	    if (zf >= 1.0) {
-	      zi++;
-	      zf--;
-	    }
-	  }
-	  return r;
+			if (xf >= 1.0) {
+				xi++;
+				xf--;
+			}
+			if (yf >= 1.0) {
+				yi++;
+				yf--;
+			}
+			if (zf >= 1.0) {
+				zi++;
+				zf--;
+			}
+		}
+		return r;
 	};
 }
 
