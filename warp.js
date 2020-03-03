@@ -7,6 +7,9 @@ class Main extends NextGame {
 		super.init();
 		this.canvas.width(800);
 		this.canvas.height(600);
+
+		this.screen = this.canvas.image();
+		this.warp = new WarpTexture(this, 'lava');
 	}
 
 	preload()
@@ -17,7 +20,9 @@ class Main extends NextGame {
 	update()
 	{
 		this.requestUpdate();
-		this.canvas.clear();
+		
+		this.warp.draw(this.screen, 100, 100);
+		this.canvas.image(this.screen);
 
 		if (this.kb.key == 'SomeKey') {
 			this.kb.key = '';
@@ -35,16 +40,18 @@ class WarpTexture
 {
 	constructor(game, asset)
 	{
-		this.canvas = game.canvas;
-		this.image = asset.data;
+		this.game = game;
+		this.image = game.assets[asset].data;
+		this.pixels = game.canvas.getPixels(this.image);
+		this.scale = 1;
 		// this.tileWidth = Math.floor(this.image.width / x);
 		// this.tileHeight = Math.floor(this.image.height / y);
 	}
 
-	draw(ti, dx, dy)
+	draw(im, x, y)
 	{
-		let sx = ti % this.x * this.tileWidth;
-		let sy = Math.floor(ti / this.x) * this.tileHeight;
-		this.canvas.context.drawImage(this.image, sx, sy, this.tileWidth, this.tileHeight, dx, dy, this.tileWidth, this.tileHeight);
+		// let c = this.game.canvas;
+		// c.getPixel(this.image, x, y);
+		// c.putPixel(im, x, y, pixel);
 	}
 }
