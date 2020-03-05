@@ -10,11 +10,18 @@ class Main extends NextGame {
 
 		this.screen = this.canvas.image();
 		this.warp = new WarpTexture(this, 'lava');
+
+		this.textures = Object.keys(this.assets);
+		this.selected = 0;
 	}
 
 	preload()
 	{
 		this.loadImage('lava', 'images/lava.png');
+		this.loadImage('lava2', 'images/lava2.png');
+		this.loadImage('slime', 'images/slime.png');
+		this.loadImage('portal', 'images/portal.png');
+		this.loadImage('sparkle', 'images/sparkle.png');
 	}
 
 	update()
@@ -23,10 +30,13 @@ class Main extends NextGame {
 
 		//this.warp.scale = 1.5;
 		this.warp.time += 0.01;
-		this.warp.draw(this.screen, 100, 100, 150, 150);
+		this.warp.draw(this.screen, 80, 50, 300, 300);
 		this.canvas.image(this.screen);
+		this.canvas.text(10, 20, 'white', 'Press "n".');
 
-		if (this.kb.key == 'SomeKey') {
+		if (this.kb.key == 'n') {
+			this.selected = (this.selected + 1) % this.textures.length;
+			this.warp = new WarpTexture(this, this.textures[this.selected]);
 			this.kb.key = '';
 		};
 
