@@ -21,6 +21,7 @@ class Main extends NextGame {
 	{
 		this.requestUpdate();
 
+		//this.warp.scale = 1.5;
 		this.warp.draw(this.screen, 100, 100, 150, 150);
 		this.canvas.image(this.screen);
 
@@ -43,8 +44,6 @@ class WarpTexture
 		this.game = game;
 		this.image = game.canvas.getImageData(game.assets[asset].data);
 		this.scale = 1;
-		// this.tileWidth = Math.floor(this.image.width / x);
-		// this.tileHeight = Math.floor(this.image.height / y);
 	}
 
 	draw(im, x0, y0, w, h)
@@ -59,9 +58,5 @@ class WarpTexture
 				im.putPixel(x + x0, y + y0, p);
 			}
 		}
-
-		// let c = this.game.canvas;
-		// c.getPixel(this.image, x, y);
-		// c.putPixel(im, x, y, pixel);
 	}
 }
