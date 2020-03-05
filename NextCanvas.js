@@ -148,13 +148,13 @@ class NextCanvas
 		im.data[i+3] = pixel[3];
 	}
 
-	getPixels(image)
+	getImageData(htmlImg)
 	{
 		const canvas = document.createElement('canvas');
-		canvas.width = image.width;
-		canvas.height = image.height;
-		canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
-		return canvas.getContext('2d').getImageData(0, 0, image.width, image.height).data;
+		canvas.width = htmlImg.width;
+		canvas.height = htmlImg.height;
+		canvas.getContext('2d').drawImage(htmlImg, 0, 0, htmlImg.width, htmlImg.height);
+		return canvas.getContext('2d').getImageData(0, 0, htmlImg.width, htmlImg.height);
 	}
 
 
