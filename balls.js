@@ -4,8 +4,11 @@ class Main extends NextGame {
 	init()
 	{
 		super.init();
-		this.canvas.width(800);
-		this.canvas.height(600);
+		this.width = 800;
+		this.height = 400;
+
+		this.canvas.width(this.width);
+		this.canvas.height(this.height);
 		this.balls = new Group(this);
 
 		for (let i = 0; i < 10; i++)
@@ -14,6 +17,7 @@ class Main extends NextGame {
 		}
 		
 		this.selected = null;
+		this.force = null;
 	}
 
 	update()
@@ -23,10 +27,6 @@ class Main extends NextGame {
 
 		this.balls.collides(this.balls);
 		this.balls.draw();
-
-		if (this.kb.key == 'SomeKey') {
-			this.kb.key = '';
-		};
 
 		if (this.mouse.buttons) {
 			this.selected = null;
@@ -41,9 +41,25 @@ class Main extends NextGame {
 		}
 
 
-		if (this.mouse.hold == this.MB_LEFT && this.selected) {
-			this.selected.x = this.mouse.x;
-			this.selected.y = this.mouse.y;
+		if (this.selected && this.mouse.hold == this.MB_LEFT) {
+
+			if (this.kbmap['s']) {
+				this.canvas.line(this.selected.x, this.selected.y, this.mouse.x, this.mouse.y, 'red');
+				this.force = [(this.selected.x - this.mouse.x) / 10, (this.selected.y - this.mouse.y) / 10];
+			}
+			else {
+				this.selected.x = this.mouse.x;
+				this.selected.y = this.mouse.y;
+			}
+
+		}
+
+		if (this.force && this.mouse.release)
+		{
+			this.selected.vx = this.force[0];
+			this.selected.vy = this.force[1];
+			this.force = null;
+			this.mouse.release = 0;
 		}
 		
 		this.time = this.now();
@@ -150,6 +166,7 @@ class Ball extends Vobj
 	{
 		super(x, y);
 		this.size = size;
+		this.angle = 0;
 	}
 
 	// static createModel()
@@ -182,8 +199,17 @@ class Ball extends Vobj
 
 	update(game)
 	{
-		if (this.outOfScreen(game.canvas)) this.dead = true;
-		if (this.dead) return;
+		if (this.x < 0) this.x = game.width;
+		if (this.y < 0) this.y = game.height;
+
+		if (this.x > game.width) this.x = 0;
+		if (this.y > game.height) this.y = 0;
+
+		if (Math.abs(this.vx) < 0.2) this.vx = 0;
+		if (Math.abs(this.vy) < 0.2) this.vy = 0;
+
+		this.ax = -0.02 * this.vx;
+		this.ay = -0.02 * this.vy;
 
 		this.vx += this.ax;
 		this.vy += this.ay;
@@ -194,6 +220,10 @@ class Ball extends Vobj
 	draw(canvas)
 	{
 		canvas.circle(this.x, this.y, this.size, this.color);
+		canvas.line(this.x, this.y, 
+			this.x + this.size * Math.cos(this.angle), 
+			this.y + this.size * Math.sin(this.angle), 
+		this.color);
 	}
 
 }
