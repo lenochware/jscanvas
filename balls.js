@@ -7,8 +7,12 @@ class Main extends NextGame {
 		this.canvas.width(800);
 		this.canvas.height(600);
 		this.balls = new Group(this);
-		this.balls.add(new Ball(100,100,20));
-		this.balls.add(new Ball(300,100,20));
+
+		for (let i = 0; i < 10; i++)
+		{
+			this.balls.add(new Ball(Utils.random(0, 600), Utils.random(0, 300), 20));
+		}
+		
 		this.selected = null;
 	}
 
