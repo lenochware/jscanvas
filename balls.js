@@ -58,6 +58,7 @@ class Main extends NextGame {
 		{
 			this.selected.vx = this.force[0];
 			this.selected.vy = this.force[1];
+			this.selected.angle = Math.atan2(this.force[1], this.force[0]);
 			this.force = null;
 			this.mouse.release = 0;
 		}
@@ -182,13 +183,13 @@ class Ball extends Vobj
 	hit(ball)
 	{
 		let d = this.dist(ball.x, ball.y);
-		let move = (this.size + ball.size - d) / 2;
+		let move = (d - this.size - ball.size) / 2;
 
-		this.x = this.x + (this.x - ball.x) / d * move;
-		this.y = this.y + (this.y - ball.y) / d * move;
+		this.x -= (this.x - ball.x) / d * move;
+		this.y -= (this.y - ball.y) / d * move;
 
-		ball.x = ball.x - (this.x - ball.x) / d * move;
-		ball.y = ball.y - (this.y - ball.y) / d * move;
+		ball.x += (this.x - ball.x) / d * move;
+		ball.y += (this.y - ball.y) / d * move;
 
 	}
 
@@ -205,8 +206,10 @@ class Ball extends Vobj
 		if (this.x > game.width) this.x = 0;
 		if (this.y > game.height) this.y = 0;
 
-		if (Math.abs(this.vx) < 0.2) this.vx = 0;
-		if (Math.abs(this.vy) < 0.2) this.vy = 0;
+		if (Math.abs(this.vx + this.vy) < 0.1) {
+			this.vx = 0;
+			this.vy = 0;
+		}
 
 		this.ax = -0.02 * this.vx;
 		this.ay = -0.02 * this.vy;
