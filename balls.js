@@ -8,20 +8,16 @@ class Main extends NextGame {
 		this.canvas.height(600);
 		this.balls = new Group(this);
 		this.balls.add(new Ball(100,100,20));
-		//this.canvas.scale = 2;
-	}
-
-	preload()
-	{
+		this.balls.add(new Ball(300,100,20));
+		this.selected = null;
 	}
 
 	update()
 	{
 		this.requestUpdate();
 		this.canvas.clear();
-		this.canvas.applyTransform();
 
-
+		this.balls.collides(this.balls);
 		this.balls.draw();
 
 		if (this.kb.key == 'SomeKey') {
@@ -29,7 +25,21 @@ class Main extends NextGame {
 		};
 
 		if (this.mouse.buttons) {
+			this.selected = null;
+			for (let ball of this.balls.members) {
+				if (ball.collidesPoint(this.mouse.x, this.mouse.y)) {
+					this.selected = ball;
+					break;
+				}
+			}
+
 			this.mouse.buttons = 0;
+		}
+
+
+		if (this.mouse.hold == this.MB_LEFT && this.selected) {
+			this.selected.x = this.mouse.x;
+			this.selected.y = this.mouse.y;
 		}
 		
 		this.time = this.now();
@@ -138,9 +148,32 @@ class Ball extends Vobj
 		this.size = size;
 	}
 
-	static createModel()
+	// static createModel()
+	// {
+	// 	Ball.model = [1,2,3,4];
+	// }
+
+	dist(x, y)
 	{
-		Ball.model = [1,2,3,4];
+		return Math.hypot(this.x - x, this.y - y);
+	}
+
+	hit(ball)
+	{
+		let d = this.dist(ball.x, ball.y);
+		let move = (this.size + ball.size - d) / 2;
+
+		this.x = this.x + (this.x - ball.x) / d * move;
+		this.y = this.y + (this.y - ball.y) / d * move;
+
+		ball.x = ball.x - (this.x - ball.x) / d * move;
+		ball.y = ball.y - (this.y - ball.y) / d * move;
+
+	}
+
+	collidesPoint(x, y)
+	{
+		return this.collides({x, y, size: 0});
 	}
 
 	update(game)
@@ -156,9 +189,7 @@ class Ball extends Vobj
 
 	draw(canvas)
 	{
-		canvas.rect(this.x, this.y, this.size, this.size, this.color);
+		canvas.circle(this.x, this.y, this.size, this.color);
 	}
 
 }
-
-Ball.createModel();
