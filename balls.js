@@ -168,6 +168,7 @@ class Ball extends Vobj
 		super(x, y);
 		this.size = size;
 		this.angle = 0;
+		this.mass = 10 * size;
 	}
 
 	// static createModel()
@@ -183,6 +184,7 @@ class Ball extends Vobj
 	hit(b2)
 	{
 		//Static collision
+
 		let b1 = this;
 
 		let d = b1.dist(b2.x, b2.y);
@@ -196,8 +198,32 @@ class Ball extends Vobj
 
 		//Dynamic collision
 
-	
+		let nx = (b2.x - b1.x) / d;
+		let ny = (b2.y - b1.y) / d;
 
+		let tx = -ny;
+		let ty = nx;
+
+		// Projekce rychlosti na tecnu mezi kruznicemi (dot product)
+		let dpTan1 = b1.vx * tx + b1.vy * ty;
+		let dpTan2 = b2.vx * tx + b2.vy * ty;
+
+		//Projekce rychlosti na smer spojnice stredu
+		let dpNorm1 = b1.vx * nx + b1.vy * ny;
+		let dpNorm2 = b2.vx * nx + b2.vy * ny;	
+
+		// Conservation of momentum in 1D
+		let m1 = (dpNorm1 * (b1.mass - b2.mass) + 2.0 * b2.mass * dpNorm2) / (b1.mass + b2.mass);
+		let m2 = (dpNorm2 * (b2.mass - b1.mass) + 2.0 * b1.mass * dpNorm1) / (b1.mass + b2.mass);
+
+		m1 = 0;
+		m2 = 0;
+
+		// Update ball velocities
+		b1.vx = tx * dpTan1 + nx * m1;
+		b1.vy = ty * dpTan1 + ny * m1;
+		b2.vx = tx * dpTan2 + nx * m2;
+		b2.vy = ty * dpTan2 + ny * m2;
 	}
 
 	collidesPoint(x, y)
