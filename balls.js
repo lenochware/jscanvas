@@ -20,14 +20,8 @@ class Main extends NextGame {
 		this.force = null;
 	}
 
-	update()
+	computeDynamicCollision()
 	{
-		this.requestUpdate();
-		this.canvas.clear();
-
-		this.balls.collides(this.balls);
-
-		//Dynamic collision
 		//Musi byt az po static collision, musi se pocitat jen jednou pro kazdou dvojici...
 		for(let b1 of this.balls.members)
 		{
@@ -63,8 +57,17 @@ class Main extends NextGame {
 			b1.vy = ty * dpTan1 + ny * m1;
 			b2.vx = tx * dpTan2 + nx * m2;
 			b2.vy = ty * dpTan2 + ny * m2;			
-		}
+		}		
+	}
 
+	update()
+	{
+		this.requestUpdate();
+		this.canvas.clear();
+
+		this.balls.collides(this.balls);
+		this.computeDynamicCollision();
+		
 		this.balls.draw();
 
 
