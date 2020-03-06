@@ -180,16 +180,23 @@ class Ball extends Vobj
 		return Math.hypot(this.x - x, this.y - y);
 	}
 
-	hit(ball)
+	hit(b2)
 	{
-		let d = this.dist(ball.x, ball.y);
-		let move = (d - this.size - ball.size) / 2;
+		//Static collision
+		let b1 = this;
 
-		this.x -= (this.x - ball.x) / d * move;
-		this.y -= (this.y - ball.y) / d * move;
+		let d = b1.dist(b2.x, b2.y);
+		let move = (d - b1.size - b2.size) / 2;
 
-		ball.x += (this.x - ball.x) / d * move;
-		ball.y += (this.y - ball.y) / d * move;
+		b1.x -= (b1.x - b2.x) / d * move;
+		b1.y -= (b1.y - b2.y) / d * move;
+
+		b2.x += (b1.x - b2.x) / d * move;
+		b2.y += (b1.y - b2.y) / d * move;
+
+		//Dynamic collision
+
+	
 
 	}
 
