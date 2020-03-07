@@ -56,7 +56,10 @@ class Main extends NextGame {
 			b1.vx = tx * dpTan1 + nx * m1;
 			b1.vy = ty * dpTan1 + ny * m1;
 			b2.vx = tx * dpTan2 + nx * m2;
-			b2.vy = ty * dpTan2 + ny * m2;			
+			b2.vy = ty * dpTan2 + ny * m2;
+
+			b1.angle = Math.atan2(b1.vy, b1. vx);
+			b2.angle = Math.atan2(b2.vy, b2. vx);
 		}		
 	}
 
