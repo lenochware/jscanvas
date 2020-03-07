@@ -12,10 +12,15 @@ class Main extends NextGame {
 		this.particles = new Group(this);
 
 		this.spaceObjects.add(this.ship);
+
+		this.space = {
+			x0: -30,
+			y0: -30,
+			x1: 830,
+			y1: 630
+		}
 		
-		let mob = new Enemy(this, 100, 100, []);
-		mob.setVelocity(1,3);
-		this.spaceObjects.add(mob);
+		this.spawnEnemy();
 	}
 
 	update()
@@ -55,6 +60,34 @@ class Main extends NextGame {
 
 		this.time = this.now();
 	}
+
+	explode(x, y, size, color)
+	{
+		for (let i = 0; i < size; i++)
+		{
+			let b = new Bullet(x, y);
+			b.setVelocity(10, Math.random() * Utils.TWO_PI);
+			b.color = color;
+
+			this.particles.add(b)			
+		}
+	}
+
+	spawnEnemy()
+	{
+		setTimeout( () => this.spawnEnemy(), 1000);
+
+		//console.log(this.spaceObjects.count(), this.spaceObjects.deadCount);
+
+		if (this.spaceObjects.count() > 10) return;
+
+		let mob = new Enemy(this, Utils.random(100, 700), this.space.y0 + 10, []);
+		mob.setVelocity(Utils.random(1, 4), Math.random() * Utils.TWO_PI);
+		this.spaceObjects.add(mob);
+		console.log('spawn enemy');
+
+	}
+
 }
 
 class Vobj
@@ -123,16 +156,24 @@ class Group
 
 	draw()
 	{
+		this.deadCount = 0;
 		for(let m of this.members) {
-			if (m.dead) continue;
+			if (m.dead) {
+				this.deadCount++;
+				continue;
+			}
 			m.update(this.game);
 			m.draw(this.game.canvas);
-			if (m.dead) this.deadCount++;
 		}
 
-		if (this.members.length > 10 && this.deadCount > 5) {
+		if (this.deadCount > 100) {
 			this.cleanUp();
 		}
+	}
+
+	count()
+	{
+		return (this.members.length - this.deadCount);
 	}
 
 	collides(group)
@@ -150,8 +191,9 @@ class Group
 
 	cleanUp()
 	{
-		this.members = this.members.filter(p => !p.dead);
 		console.log('cleanUp', this.members.length);
+		this.members = this.members.filter(p => !p.dead);
+		this.deadCount = 0;
 	}
 
 	add(m)
@@ -276,10 +318,8 @@ class Enemy extends Sprite
 
 	update(game)
 	{
-		let off = this.outOfScreen(game.canvas);
-
-		if (off == 1) this.vx *= -1;
-		if (off == 2) this.vy *= -1;
+		if (this.x < game.space.x0 || this.x > game.space.x1) this.vx *= -1;
+		if (this.y < game.space.y0 || this.y > game.space.y1) this.vy *= -1;
 
 		this.x += this.vx;
 		this.y += this.vy;
@@ -290,7 +330,10 @@ class Enemy extends Sprite
 		this.color = 'red';
 		setTimeout( () => this.color = 'white', 200);
 
-		if (vobj instanceof Bullet) this.dead = true;
+		if (vobj instanceof Bullet) {
+			this.dead = true;
+			this.game.explode(this.x, this.y, 10, 'lime');
+		}
 	}		
 
 	draw(canvas)

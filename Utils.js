@@ -66,6 +66,7 @@ class Utils
 }
 
 Utils.seed = Date.now();
+Utils.TWO_PI = 2 * Math.PI;
 
 //From https://p5js.org/
 class Perlin

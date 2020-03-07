@@ -21,7 +21,7 @@
 			}
 
 			$.getScript(script + '.js').done(function() {
-				const game = new Main();
+				game = new Main();
 				game.start();
 			})
 			.fail(function() {
