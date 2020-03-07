@@ -74,7 +74,16 @@ class Vobj
 		this.dead = false;
 	}
 
-	update(game) {}
+	update(game)
+	{
+		if (this.dead) return;
+
+		this.vx += this.ax;
+		this.vy += this.ay;
+		this.x += this.vx;
+		this.y += this.vy;
+	}
+
 	draw(canvas) {}
 
 	collides(vobj)
@@ -83,7 +92,7 @@ class Vobj
 		return ((vobj.x - this.x) ** 2 + (vobj.y - this.y) ** 2 <= (vobj.size + this.size) **2);
 	}
 
-	hit(source)
+	hit(vobj)
 	{
 		this.dead = true;
 	}
@@ -151,17 +160,12 @@ class Group
 	}
 }
 
-class Particle extends Vobj
+class Bullet extends Vobj
 {
 	update(game)
 	{
+		super.update(game);
 		if (this.outOfScreen(game.canvas)) this.dead = true;
-		if (this.dead) return;
-
-		this.vx += this.ax;
-		this.vy += this.ay;
-		this.x += this.vx;
-		this.y += this.vy;
 	}
 
 	draw(canvas)
@@ -230,7 +234,7 @@ class Ship extends Sprite
 
 	fire()
 	{
-		let p = new Particle(this.x, this.y);
+		let p = new Bullet(this.x, this.y);
 		p.setVelocity(5, this.angle);
 
 		p.x += 4 * p.vx;
@@ -239,6 +243,12 @@ class Ship extends Sprite
 
 		this.game.particles.add(p);
 	}
+
+	hit(vobj)
+	{
+		this.color = 'red';
+		setTimeout( () => this.color = 'white', 200);
+	}	
 
 	update(game)
 	{
@@ -274,6 +284,14 @@ class Enemy extends Sprite
 		this.x += this.vx;
 		this.y += this.vy;
 	}
+
+	hit(vobj)
+	{
+		this.color = 'red';
+		setTimeout( () => this.color = 'white', 200);
+
+		if (vobj instanceof Bullet) this.dead = true;
+	}		
 
 	draw(canvas)
 	{
