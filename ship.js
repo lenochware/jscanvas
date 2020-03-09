@@ -237,16 +237,18 @@ class Sprite extends Vobj
 		return output;
 	}
 
-	rotate(nodes, a)
+	transformNodes()
 	{
 		let output = [];
 
-		for(let i = 0; i < nodes.length; i += 2) {
+		let a = this.angle;
+
+		for(let i = 0; i < this.nodes.length; i += 2) {
 			let x = this.nodes[i];
 			let y = this.nodes[i+1];
 
-			output.push(x * Math.cos(a) - y * Math.sin(a));
-			output.push(x * Math.sin(a) + y * Math.cos(a));
+			output.push(x * Math.cos(a) - y * Math.sin(a) + this.x);
+			output.push(x * Math.sin(a) + y * Math.cos(a) + this.y);
 		}
 
 		return output;
@@ -257,7 +259,7 @@ class Sprite extends Vobj
 		this.x = Utils.clamp(this.x, 0, canvas.width());
 		this.y = Utils.clamp(this.y, 0, canvas.height());
 
-		let nodes = this.translate(this.rotate(this.nodes, this.angle), this.x, this.y);
+		let nodes = this.transformNodes();
 
 		canvas.polygon(nodes, this.color);
 	}
