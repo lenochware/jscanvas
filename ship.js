@@ -65,7 +65,7 @@ class Main extends NextGame {
 	{
 		for (let i = 0; i < size; i++)
 		{
-			let b = new Bullet(x, y);
+			let b = new Frag(x, y);
 			b.setVelocity(10, Math.random() * Utils.TWO_PI);
 			b.color = color;
 
@@ -202,8 +202,14 @@ class Group
 	}
 }
 
-class Bullet extends Vobj
+class Frag extends Vobj
 {
+	constructor(x, y)
+	{
+		super(x, y);
+		this.damage = 3;
+	}
+
 	update(game)
 	{
 		super.update(game);
@@ -224,17 +230,28 @@ class Sprite extends Vobj
 		super(x, y);
 		this.game = game;
 		this.nodes = nodes;
+		this.healthPoints = 10;
+		this.damage = 0;
 	}
 
-	translate(nodes, x, y)
+	hit(vobj)
 	{
-		let output = [];
-		for(let i = 0; i < nodes.length; i += 2) {
-			output.push(nodes[i] + x);
-			output.push(nodes[i+1] + y);
-		}
+		this.color = 'red';
+		setTimeout( () => this.color = 'white', 200);
 
-		return output;
+		this.healthPoints -= vobj.damage;
+
+		if (this.healthPoints <= 0) this.destroy(vobj);
+
+		if (vobj instanceof Frag) {
+			this.x += vobj.vx;
+			this.y += vobj.vy;			
+		}
+	}
+
+	destroy(src)
+	{
+		this.dead = true;
 	}
 
 	transformNodes()
@@ -278,7 +295,7 @@ class Ship extends Sprite
 
 	fire()
 	{
-		let p = new Bullet(this.x, this.y);
+		let p = new Frag(this.x, this.y);
 		p.setVelocity(5, this.angle);
 
 		p.x += 4 * p.vx;
@@ -288,11 +305,11 @@ class Ship extends Sprite
 		this.game.particles.add(p);
 	}
 
-	hit(vobj)
+	destroy(src)
 	{
-		this.color = 'red';
-		setTimeout( () => this.color = 'white', 200);
-	}	
+		super.destroy(src);
+		this.game.explode(this.x, this.y, 20, 'purple');
+	}			
 
 	update(game)
 	{
@@ -329,13 +346,17 @@ class Enemy extends Sprite
 
 	hit(vobj)
 	{
-		this.color = 'red';
-		setTimeout( () => this.color = 'white', 200);
+		super.hit(vobj);
 
-		if (vobj instanceof Bullet) {
-			this.dead = true;
-			this.game.explode(this.x, this.y, 10, 'lime');
+		if (vobj instanceof Sprite) {
+			if (this.vx > this.vy) this.vx *= -1; else this.vy *= -1;
 		}
+	}
+
+	destroy(src)
+	{
+		super.destroy(src);
+		this.game.explode(this.x, this.y, 10, 'lime');
 	}		
 
 	draw(canvas)
