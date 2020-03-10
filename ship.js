@@ -61,7 +61,7 @@ class Main extends NextGame {
 		this.time = this.now();
 	}
 
-	explode(x, y, size, color)
+	explodeRand(x, y, size, color)
 	{
 		for (let i = 0; i < size; i++)
 		{
@@ -72,6 +72,26 @@ class Main extends NextGame {
 			this.particles.add(b)			
 		}
 	}
+
+	explode(x, y, size, color, speed, fragClass)
+	{
+
+		let explosion = new Group(this);
+
+		for (let i = 0; i < size; i++)
+		{
+			let b = new fragClass(x, y);
+			b.setVelocity(speed, Utils.TWO_PI / size * i);
+			b.color = color;
+
+
+			explosion.add(b);
+		}
+		
+		this.particles.add(explosion);
+
+	}
+
 
 	spawnEnemy()
 	{
@@ -198,7 +218,12 @@ class Group
 
 	add(m)
 	{
-		this.members.push(m);
+		if (m instanceof Group) {
+			this.members = this.members.concat(m.members);
+		}
+		else {
+			this.members.push(m);
+		}
 	}
 }
 
@@ -309,7 +334,7 @@ class Ship extends Sprite
 	destroy(src)
 	{
 		super.destroy(src);
-		this.game.explode(this.x, this.y, 20, 'purple');
+		this.game.explodeRand(this.x, this.y, 20, 'purple');
 	}			
 
 	update(game)
@@ -365,7 +390,7 @@ class Enemy extends Sprite
 	destroy(src)
 	{
 		super.destroy(src);
-		this.game.explode(this.x, this.y, 10, 'lime');
+		this.game.explode(this.x, this.y, 10, 'lime', 5, Frag);
 	}		
 
 	draw(canvas)
