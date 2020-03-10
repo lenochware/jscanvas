@@ -349,7 +349,12 @@ class Enemy extends Sprite
 		super.hit(vobj);
 
 		if (vobj instanceof Sprite) {
-			if (this.vx > this.vy) this.vx *= -1; else this.vy *= -1;
+			if (Math.abs(this.vx) > Math.abs(this.vy)) {
+				this.vx = Math.sign(this.x - vobj.x) * Math.abs(this.vx);
+			}
+			else {
+				this.vy = Math.sign(this.y - vobj.y) * Math.abs(this.vy);
+			}
 		}
 	}
 
