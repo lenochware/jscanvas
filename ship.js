@@ -207,7 +207,7 @@ class Frag extends Vobj
 	constructor(x, y)
 	{
 		super(x, y);
-		this.damage = 3;
+		this.damage = 5;
 	}
 
 	update(game)
@@ -244,8 +244,8 @@ class Sprite extends Vobj
 		if (this.healthPoints <= 0) this.destroy(vobj);
 
 		if (vobj instanceof Frag) {
-			this.x += vobj.vx;
-			this.y += vobj.vy;			
+			this.vx += vobj.vx / 3;
+			this.vy += vobj.vy / 3;
 		}
 	}
 
@@ -288,9 +288,10 @@ class Ship extends Sprite
 	{
 		super(game, x, y, nodes);
 
-		this.decel = 0.1;
+		this.decel = 0.05;
 		this.angle = 1;
 		this.size = 15;
+		this.healthPoints = 50;
 	}
 
 	fire()
@@ -320,6 +321,9 @@ class Ship extends Sprite
 
 		if (off == 1) this.vx *= -1;
 		if (off == 2) this.vy *= -1;
+
+		this.vx = Utils.clamp(this.vx, -5, 5);
+		this.vy = Utils.clamp(this.vy, -5, 5);
 
 		this.x += this.vx;
 		this.y += this.vy;
