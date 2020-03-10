@@ -19,6 +19,8 @@ class Main extends NextGame {
 			x1: 830,
 			y1: 630
 		}
+
+		this.score = 0;
 		
 		this.spawnEnemy();
 	}
@@ -58,7 +60,8 @@ class Main extends NextGame {
 			this.mouse.buttons = 0;
 		}
 
-		this.time = this.now();
+		this.canvas.setFont("20px verdana");
+		this.canvas.text(20, 30, 'lime', "Power: " + this.ship.healthPoints  + " score: " + this.score);
 	}
 
 	explodeRand(x, y, size, color)
@@ -81,12 +84,14 @@ class Main extends NextGame {
 		for (let i = 0; i < size; i++)
 		{
 			let b = new fragClass(x, y);
-			b.setVelocity(speed, Utils.TWO_PI / size * i);
+			b.setVelocity(speed/2, Utils.TWO_PI / size * i);
 			b.color = color;
 
 
 			explosion.add(b);
 		}
+
+		setTimeout(() => explosion.each(m => m.color = 'blue'), 1000);
 		
 		this.particles.add(explosion);
 
@@ -225,6 +230,14 @@ class Group
 			this.members.push(m);
 		}
 	}
+
+	each(f)
+	{
+		for(let m of this.members) {
+			if (m.dead) continue;
+			f(m);
+		}
+	}
 }
 
 class Frag extends Vobj
@@ -269,8 +282,8 @@ class Sprite extends Vobj
 		if (this.healthPoints <= 0) this.destroy(vobj);
 
 		if (vobj instanceof Frag) {
-			this.vx += vobj.vx / 3;
-			this.vy += vobj.vy / 3;
+			this.vx += vobj.vx;
+			this.vy += vobj.vy;
 		}
 	}
 
@@ -321,6 +334,10 @@ class Ship extends Sprite
 
 	fire()
 	{
+		if (this.dead) {
+			alert('You are dead!');
+		}
+
 		let p = new Frag(this.x, this.y);
 		p.setVelocity(5, this.angle);
 
@@ -391,6 +408,13 @@ class Enemy extends Sprite
 	{
 		super.destroy(src);
 		this.game.explode(this.x, this.y, 10, 'lime', 5, Frag);
+		this.game.score += 5;
+
+		//Big bang!
+		if (Math.random() < 0.1) {
+			setTimeout(() => this.game.explode(this.x, this.y, 12, 'lime', 7, Frag), 200);
+			setTimeout(() => this.game.explode(this.x, this.y, 15, 'yellow', 10, Frag), 400);
+		}
 	}		
 
 	draw(canvas)
