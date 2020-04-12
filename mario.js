@@ -9,6 +9,10 @@ class Main extends NextGame {
 		this.canvas.height(300);
 
 		let tileSet = new Tileset(this, this.assets.tiles, 26, 24);
+		let playerTiles = new Tileset(this, this.assets.player, 28, 1);
+
+		this.player = new Player(this, playerTiles, 50, 50);
+
 
 		this.level = new Level(tileSet, [
 			"...................................................",
@@ -27,6 +31,7 @@ class Main extends NextGame {
 
 	preload()
 	{
+		this.loadImage('player', 'images/mario.png');	
 		this.loadImage('tiles', 'images/mario-tiles.png');	
 	}
 
@@ -36,6 +41,8 @@ class Main extends NextGame {
 		this.canvas.fill('lightblue');
 
 		this.level.draw();
+		this.player.update();
+		this.player.draw();
 
 		if (this.kb.key == 'SomeKey') {
 			this.kb.key = '';
@@ -65,7 +72,12 @@ class Level
 
 	get(x, y)
 	{
-		return this.map[y][x];
+		let tx = Math.floor(x / this.tileSet.tileWidth);
+		let ty = Math.floor(y / this.tileSet.tileHeight);
+
+		if (tx < 0 || ty < 0 || tx > this.width || ty > this.height) return null;
+
+		return this.map[ty][tx];
 	}
 
 	draw()
@@ -73,11 +85,84 @@ class Level
 		let ti = {"#": 3};
 		for(let y = 0; y < 11; y++) {
 			for (let x = 0; x < 30; x++) {
-				let c = this.get(x, y);
+				let c = this.map[y][x];
 				if (c == '.') continue;
 				this.tileSet.draw(ti[c], x * this.tileSet.tileWidth, y * this.tileSet.tileHeight);
 			}
 		}
+	}
+}
+
+class Player
+{
+	constructor(game, tiles, x, y)
+	{
+		this.game = game;
+		this.tiles = tiles;
+		this.x = x;
+		this.y = y;
+		this.vx = 0;
+		this.vy = 0;
+		this.width = this.tiles.tileWidth;
+		this.height = this.tiles.tileHeight;
+	}
+
+	decel()
+	{
+		this.vx = this.vx - Math.sign(this.vx) * 0.05;
+		if (Math.abs(this.vx) < 0.1) this.vx = 0;
+
+		this.vy = this.vy - Math.sign(this.vy) * 0.05;
+		if (Math.abs(this.vy) < 0.1) this.vy = 0;
+	}
+
+	update()
+	{
+		if (this.game.kbmap['ArrowLeft']) this.vx -= 0.2;
+		if (this.game.kbmap['ArrowRight']) this.vx += 0.2;
+		
+		this.vx = Utils.clamp(this.vx, -3, 3);
+
+		//y
+		if (this.game.kbmap['ArrowUp']) this.vy -= 0.2;
+		if (this.game.kbmap['ArrowDown']) this.vy += 0.2;
+		
+		this.vy = Utils.clamp(this.vy, -3, 3);
+
+		this.decel();
+
+		let x = this.x + this.vx;
+		let y = this.y + this.vy;
+
+		if (this.game.level.get(x, y) == '#' 
+			|| this.game.level.get(x + this.width, y) == '#')
+		{
+			this.vx = 0;
+			x = this.x;
+		}
+
+		if (this.game.level.get(x + this.width, y + this.height) == '#' 
+			|| this.game.level.get(x, y + this.height) == '#') 
+		{
+			this.vy = 0;
+			y = this.y;
+		}
+
+		this.x = x;
+		this.y = y;
+	}
+
+	collides(x, y)
+	{
+		if (this.game.level.get(x + this.width, y + this.height) == '#') return true;
+		if (this.game.level.get(x, y + this.height) == '#') return true;
+
+		return false;
+	}
+
+	draw()
+	{
+		this.tiles.draw(2, Math.floor(this.x), Math.floor(this.y));
 	}
 }
 
