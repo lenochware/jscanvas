@@ -11,9 +11,6 @@ class Main extends NextGame {
 		let tileSet = new Tileset(this, this.assets.tiles, 26, 24);
 		let playerTiles = new Tileset(this, this.assets.player, 28, 1);
 
-		this.player = new Player(this, playerTiles, 50, 50);
-
-
 		this.level = new Level(tileSet, [
 			"...................................................",
 			"...................................................",
@@ -27,6 +24,9 @@ class Main extends NextGame {
 			"..............#....................................",
 			"###################################################",
 		]);
+
+		this.player = new Player(this, playerTiles, 5, 5);
+
 	}
 
 	preload()
@@ -63,6 +63,8 @@ class Level
 	{
 		this.map = [];
 		this.tileSet = tileSet;
+		this.tileWidth = tileSet.tileWidth;
+		this.tileHeight = tileSet.tileHeight;
 		this.height = levelMap.length;
 		for(let s of levelMap) {
 			this.map.push(s.split(""));
@@ -72,8 +74,8 @@ class Level
 
 	get(x, y)
 	{
-		let tx = Math.floor(x / this.tileSet.tileWidth);
-		let ty = Math.floor(y / this.tileSet.tileHeight);
+		let tx = Math.floor(x);
+		let ty = Math.floor(y);
 
 		if (tx < 0 || ty < 0 || tx > this.width || ty > this.height) return null;
 
@@ -98,6 +100,7 @@ class Player
 	constructor(game, tiles, x, y)
 	{
 		this.game = game;
+		this.level = game.level;
 		this.tiles = tiles;
 		this.x = x;
 		this.y = y;
@@ -109,60 +112,74 @@ class Player
 
 	decel()
 	{
-		this.vx = this.vx - Math.sign(this.vx) * 0.05;
-		if (Math.abs(this.vx) < 0.1) this.vx = 0;
+		this.vx = this.vx - Math.sign(this.vx) * 0.005;
+		if (Math.abs(this.vx) < 0.01) this.vx = 0;
 
-		this.vy = this.vy - Math.sign(this.vy) * 0.05;
-		if (Math.abs(this.vy) < 0.1) this.vy = 0;
+		this.vy = this.vy - Math.sign(this.vy) * 0.005;
+		if (Math.abs(this.vy) < 0.01) this.vy = 0;
 	}
 
 	update()
 	{
-		if (this.game.kbmap['ArrowLeft']) this.vx -= 0.2;
-		if (this.game.kbmap['ArrowRight']) this.vx += 0.2;
+		if (this.game.kbmap['ArrowLeft']) this.vx -= 0.02;
+		if (this.game.kbmap['ArrowRight']) this.vx += 0.02;
 		
-		this.vx = Utils.clamp(this.vx, -3, 3);
+		this.vx = Utils.clamp(this.vx, -.3, .3);
 
 		//y
-		if (this.game.kbmap['ArrowUp']) this.vy -= 0.2;
-		if (this.game.kbmap['ArrowDown']) this.vy += 0.2;
+		if (this.game.kbmap['ArrowUp']) this.vy -= 0.02;
+		if (this.game.kbmap['ArrowDown']) this.vy += 0.02;
 		
-		this.vy = Utils.clamp(this.vy, -3, 3);
+		this.vy = Utils.clamp(this.vy, -.3, .3);
 
 		this.decel();
 
-		let x = this.x + this.vx;
-		let y = this.y + this.vy;
+		let newX = this.x + this.vx;
+		let newY = this.y + this.vy;
 
-		if (this.game.level.get(x, y) == '#' 
-			|| this.game.level.get(x + this.width, y) == '#')
-		{
+		this.collisionX = 0;
+		this.collisionY = 0;
+
+		this.checkCollision(newX, newY);
+		this.checkCollision(newX + 1, newY);
+		this.checkCollision(newX, newY + 1);
+		this.checkCollision(newX + 1, newY + 1);
+
+		if (this.collisionX) {
 			this.vx = 0;
-			x = this.x;
+			newX = this.x;
 		}
 
-		if (this.game.level.get(x + this.width, y + this.height) == '#' 
-			|| this.game.level.get(x, y + this.height) == '#') 
-		{
+		if (this.collisionY) {
 			this.vy = 0;
-			y = this.y;
+			newY = this.y;
 		}
 
-		this.x = x;
-		this.y = y;
+		this.x = newX;
+		this.y = newY;
 	}
 
-	collides(x, y)
+	checkCollision(x, y)
 	{
-		if (this.game.level.get(x + this.width, y + this.height) == '#') return true;
-		if (this.game.level.get(x, y + this.height) == '#') return true;
+		if (this.level.get(x, y) != '#') return false;
 
-		return false;
+		let dx = Math.floor(x) - Math.floor(this.x);
+		let dy = Math.floor(y) - Math.floor(this.y);
+
+		if (dx > 0) this.collisionX = Math.floor(x);
+		if (dy > 0) this.collisionY = Math.floor(y);
+
+		if (dx < 0) this.collisionX = Math.floor(x + 1);
+		if (dy < 0) this.collisionY = Math.floor(y + 1);
+
 	}
 
 	draw()
 	{
-		this.tiles.draw(2, Math.floor(this.x), Math.floor(this.y));
+		this.tiles.draw(2, 
+			Math.floor(this.x * this.level.tileWidth), 
+			Math.floor(this.y * this.level.tileHeight)
+		);
 	}
 }
 
