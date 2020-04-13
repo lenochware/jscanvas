@@ -19,14 +19,13 @@ class Main extends NextGame {
 			"...................................................",
 			"...................................................",
 			"...................................................",
-			"...###...........................###...............",
+			"...###...#.#.....................###...............",
 			"...................................................",
 			"..............#....................................",
 			"###################################################",
 		]);
 
 		this.player = new Player(this, playerTiles, 5, 5);
-
 	}
 
 	preload()
@@ -39,6 +38,7 @@ class Main extends NextGame {
 	{
 		this.requestUpdate();
 		this.canvas.fill('lightblue');
+		this.canvas.text(10, 10, 'white', this.player.x + ', ' + this.player.y);
 
 		this.level.draw();
 		this.player.update();
@@ -112,17 +112,17 @@ class Player
 
 	decel()
 	{
-		this.vx = this.vx - Math.sign(this.vx) * 0.005;
+		this.vx = this.vx - Math.sign(this.vx) * 0.01;
 		if (Math.abs(this.vx) < 0.01) this.vx = 0;
 
-		this.vy = this.vy - Math.sign(this.vy) * 0.005;
+		this.vy = this.vy - Math.sign(this.vy) * 0.01;
 		if (Math.abs(this.vy) < 0.01) this.vy = 0;
 	}
 
 	update()
 	{
-		if (this.game.kbmap['ArrowLeft']) this.vx -= 0.02;
-		if (this.game.kbmap['ArrowRight']) this.vx += 0.02;
+		if (this.game.kbmap['ArrowLeft']) this.vx -= 0.03;
+		if (this.game.kbmap['ArrowRight']) this.vx += 0.03;
 		
 		this.vx = Utils.clamp(this.vx, -.3, .3);
 
@@ -140,38 +140,46 @@ class Player
 		this.collisionX = 0;
 		this.collisionY = 0;
 
-		this.checkCollision(newX, newY);
-		this.checkCollision(newX + 1, newY);
-		this.checkCollision(newX, newY + 1);
-		this.checkCollision(newX + 1, newY + 1);
-
-		if (this.collisionX) {
-			this.vx = 0;
-			newX = this.x;
-		}
+		this.checkCollision(0, 0);
+		this.checkCollision(.99, 0);
+		this.checkCollision(0, .99);
+		this.checkCollision(.99, .99);
 
 		if (this.collisionY) {
 			this.vy = 0;
-			newY = this.y;
+			newY = this.collisionY;
+		}
+		else if (this.collisionX) {
+			this.vx = 0;
+			newX = this.collisionX;
+		}
+
+	
+		if (this.vx || this.vy || this.collisionX || this.collisionY) {
+			console.log(newX, newY);
 		}
 
 		this.x = newX;
 		this.y = newY;
 	}
 
-	checkCollision(x, y)
+	checkCollision(ax, ay)
 	{
-		if (this.level.get(x, y) != '#') return false;
+		let oX = this.x + ax;
+		let oY = this.y + ay;
+		let nX = this.x + this.vx + ax;
+		let nY = this.y + this.vy + ay;
 
-		let dx = Math.floor(x) - Math.floor(this.x);
-		let dy = Math.floor(y) - Math.floor(this.y);
+		if (this.level.get(nX, nY) != '#') return false;
 
-		if (dx > 0) this.collisionX = Math.floor(x);
-		if (dy > 0) this.collisionY = Math.floor(y);
+		let dx = Math.floor(nX) - Math.floor(oX);
+		let dy = Math.floor(nY) - Math.floor(oY);
 
-		if (dx < 0) this.collisionX = Math.floor(x + 1);
-		if (dy < 0) this.collisionY = Math.floor(y + 1);
+		if (dx) this.collisionX = Math.floor(oX);
+		if (dy) this.collisionY = Math.floor(oY);
 
+		if (dx) console.log('col x');
+		if (dy) console.log('col y');
 	}
 
 	draw()
