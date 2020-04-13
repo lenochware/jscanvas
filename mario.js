@@ -117,6 +117,9 @@ class Player
 
 		this.vy = this.vy - Math.sign(this.vy) * 0.01;
 		if (Math.abs(this.vy) < 0.01) this.vy = 0;
+			
+		if (!this.vx && Math.abs(this.x - Math.round(this.x)) < 0.126) this.x = Math.round(this.x);
+		if (!this.vy && Math.abs(this.y - Math.round(this.y)) < 0.126) this.y = Math.round(this.y);
 	}
 
 	update()
@@ -127,8 +130,8 @@ class Player
 		this.vx = Utils.clamp(this.vx, -.3, .3);
 
 		//y
-		if (this.game.kbmap['ArrowUp']) this.vy -= 0.02;
-		if (this.game.kbmap['ArrowDown']) this.vy += 0.02;
+		if (this.game.kbmap['ArrowUp']) this.vy -= 0.03;
+		if (this.game.kbmap['ArrowDown']) this.vy += 0.03;
 		
 		this.vy = Utils.clamp(this.vy, -.3, .3);
 
@@ -162,7 +165,6 @@ class Player
 			this.vy = 0;
 			this.newY = Math.floor(oY);
 		}
-
 	}
 
 	draw()
