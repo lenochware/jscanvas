@@ -134,33 +134,16 @@ class Player
 
 		this.decel();
 
-		let newX = this.x + this.vx;
-		let newY = this.y + this.vy;
-
-		this.collisionX = 0;
-		this.collisionY = 0;
+		this.newX = this.x + this.vx;
+		this.newY = this.y + this.vy;
 
 		this.checkCollision(0, 0);
 		this.checkCollision(.99, 0);
 		this.checkCollision(0, .99);
 		this.checkCollision(.99, .99);
 
-		if (this.collisionY) {
-			this.vy = 0;
-			newY = this.collisionY;
-		}
-		else if (this.collisionX) {
-			this.vx = 0;
-			newX = this.collisionX;
-		}
-
-	
-		if (this.vx || this.vy || this.collisionX || this.collisionY) {
-			console.log(newX, newY);
-		}
-
-		this.x = newX;
-		this.y = newY;
+		this.x = this.newX;
+		this.y = this.newY;
 	}
 
 	checkCollision(ax, ay)
@@ -170,16 +153,16 @@ class Player
 		let nX = this.x + this.vx + ax;
 		let nY = this.y + this.vy + ay;
 
-		if (this.level.get(nX, nY) != '#') return false;
+		if (this.level.get(nX, oY) != '.') {
+			this.vx = 0;
+			this.newX = Math.floor(oX);
+		}
 
-		let dx = Math.floor(nX) - Math.floor(oX);
-		let dy = Math.floor(nY) - Math.floor(oY);
+		if (this.level.get(oX, nY) != '.') {
+			this.vy = 0;
+			this.newY = Math.floor(oY);
+		}
 
-		if (dx) this.collisionX = Math.floor(oX);
-		if (dy) this.collisionY = Math.floor(oY);
-
-		if (dx) console.log('col x');
-		if (dy) console.log('col y');
 	}
 
 	draw()
