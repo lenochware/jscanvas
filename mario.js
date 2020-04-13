@@ -102,6 +102,7 @@ class Player
 		this.game = game;
 		this.level = game.level;
 		this.tiles = tiles;
+		this.frame = 2;
 		this.x = x;
 		this.y = y;
 		this.vx = 0;
@@ -124,14 +125,21 @@ class Player
 
 	update()
 	{
-		if (this.game.kbmap['ArrowLeft']) this.vx -= 0.03;
-		if (this.game.kbmap['ArrowRight']) this.vx += 0.03;
+		if (this.game.kbmap['ArrowLeft']) {
+			this.vx -= 0.03;
+			this.frame = 2;
+		}
+
+		if (this.game.kbmap['ArrowRight']) {
+			this.vx += 0.03;
+			this.frame = 22;
+		}
 		
 		this.vx = Utils.clamp(this.vx, -.3, .3);
 
 		//y
-		if (this.game.kbmap['ArrowUp']) this.vy -= 0.03;
-		if (this.game.kbmap['ArrowDown']) this.vy += 0.03;
+		if (this.game.kbmap['ArrowUp']) this.vy -= 0.06;
+		this.vy += 0.03;
 		
 		this.vy = Utils.clamp(this.vy, -.3, .3);
 
@@ -161,7 +169,9 @@ class Player
 			this.newX = Math.floor(oX);
 		}
 
-		if (this.level.get(oX, nY) != '.') {
+		nX = this.newX + ax;
+
+		if (this.level.get(nX, nY) != '.') {
 			this.vy = 0;
 			this.newY = Math.floor(oY);
 		}
@@ -169,7 +179,7 @@ class Player
 
 	draw()
 	{
-		this.tiles.draw(2, 
+		this.tiles.draw(this.frame, 
 			Math.floor(this.x * this.level.tileWidth), 
 			Math.floor(this.y * this.level.tileHeight)
 		);
