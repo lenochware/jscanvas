@@ -7,6 +7,7 @@ class Main extends NextGame {
 		super.init();
 		this.canvas.width(400);
 		this.canvas.height(300);
+		this.frameCount = 0;
 
 		let tileSet = new Tileset(this, this.assets.tiles, 26, 24);
 		let playerTiles = new Tileset(this, this.assets.player, 28, 1);
@@ -50,6 +51,7 @@ class Main extends NextGame {
 		this.level.setPos(this.player.x - 10, this.player.y - 3);
 
 		this.level.draw();
+		if (this.frameCount % 5 == 0) this.player.nextFrame();
 		this.player.draw();
 
 		if (this.kb.key == 'SomeKey') {
@@ -61,6 +63,7 @@ class Main extends NextGame {
 		}
 		
 		this.time = this.now();
+		this.frameCount++;
 	}
 }
 
@@ -159,16 +162,21 @@ class Player
 		if (!this.vy && Math.abs(this.y - Math.round(this.y)) < 0.126) this.y = Math.round(this.y);
 	}
 
+	nextFrame()
+	{
+		if (this.vx == 0) return;
+		this.frame = (this.frame + 1) % 5;
+	}
+
 	update()
 	{
 		if (this.game.kbmap['ArrowLeft']) {
 			this.vx -= 0.03;
-			this.frame = 2;
+			//this.frame = 2;
 		}
 
 		if (this.game.kbmap['ArrowRight']) {
 			this.vx += 0.03;
-			this.frame = 22;
 		}
 		
 		this.vx = Utils.clamp(this.vx, -.3, .3);
@@ -234,7 +242,9 @@ class Player
 
 	draw()
 	{
-		this.tiles.draw(this.frame, 
+		let frame = (this.vx > 0)? this.frame + 22 : this.frame + 1;
+
+		this.tiles.draw(frame, 
 			Math.floor((this.x - this.level.view.x) * this.level.tileWidth), 
 			Math.floor((this.y - this.level.view.y) * this.level.tileHeight)
 		);
