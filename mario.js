@@ -12,6 +12,11 @@ class Main extends NextGame {
 		let playerTiles = new Tileset(this, this.assets.player, 28, 1);
 
 		this.level = new Level(tileSet, [
+			".....#.............................................",
+			".....#.............................................",
+			".....#.............................................",
+			".....#.............................................",
+			".....#.............................................",
 			"...................................................",
 			"...................................................",
 			"...................................................",
@@ -40,8 +45,11 @@ class Main extends NextGame {
 		this.canvas.fill('lightblue');
 		this.canvas.text(10, 10, 'white', this.player.x + ', ' + this.player.y);
 
-		this.level.draw();
 		this.player.update();
+
+		this.level.setPos(this.player.x - 10, this.player.y - 3);
+
+		this.level.draw();
 		this.player.draw();
 
 		if (this.kb.key == 'SomeKey') {
@@ -70,6 +78,18 @@ class Level
 			this.map.push(s.split(""));
 		}
 		this.width = this.map[0].length;
+		this.view = {
+			x: 0,
+			y: 0,
+			width: 30,
+			height: 13
+		}
+	}
+
+	setPos(x, y)
+	{
+		this.view.x = Utils.clamp(x, 0, this.width - this.view.width);
+		this.view.y = Utils.clamp(y, 0, this.height - this.view.height);
 	}
 
 	get(x, y)
@@ -85,11 +105,17 @@ class Level
 	draw()
 	{
 		let ti = {"#": 3};
-		for(let y = 0; y < 11; y++) {
-			for (let x = 0; x < 30; x++) {
-				let c = this.map[y][x];
+
+		for(let y = 0; y < this.view.height; y++) {
+			for (let x = 0; x < this.view.width; x++)
+			{
+				let c = this.map[y + ~~this.view.y][x + ~~this.view.x];
 				if (c == '.') continue;
-				this.tileSet.draw(ti[c], x * this.tileSet.tileWidth, y * this.tileSet.tileHeight);
+				
+				this.tileSet.draw(ti[c], 
+					(x - this.view.x % 1) * this.tileSet.tileWidth, 
+					(y - this.view.y % 1) * this.tileSet.tileHeight
+				);
 			}
 		}
 	}
@@ -180,8 +206,8 @@ class Player
 	draw()
 	{
 		this.tiles.draw(this.frame, 
-			Math.floor(this.x * this.level.tileWidth), 
-			Math.floor(this.y * this.level.tileHeight)
+			Math.floor((this.x - this.level.view.x) * this.level.tileWidth), 
+			Math.floor((this.y - this.level.view.y) * this.level.tileHeight)
 		);
 	}
 }
