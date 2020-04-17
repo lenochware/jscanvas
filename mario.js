@@ -21,10 +21,10 @@ class Main extends NextGame {
 			"...................................................",
 			"...................................................",
 			"...................................................",
-			"...................................................",
-			"...................................................",
-			"...................................................",
-			"...###...#.#.....................###...............",
+			"......................$.$..........................",
+			".....................$.$.$.........................",
+			"...................WWWWWWWWWW......................",
+			"...###...#.#.....................#?#...............",
 			"...................................................",
 			"..............#....................................",
 			"###################################################",
@@ -102,9 +102,19 @@ class Level
 		return this.map[ty][tx];
 	}
 
+	set(x, y, c)
+	{
+		let tx = Math.floor(x);
+		let ty = Math.floor(y);
+
+		if (tx < 0 || ty < 0 || tx > this.width || ty > this.height) return null;
+
+		this.map[ty][tx] = c;
+	}
+
 	draw()
 	{
-		let ti = {"#": 3};
+		let ti = {"#": 3, "?": 0, "$": 26, "W": 6};
 
 		for(let y = 0; y < this.view.height; y++) {
 			for (let x = 0; x < this.view.width; x++)
@@ -183,6 +193,11 @@ class Player
 		this.y = this.newY;
 	}
 
+	collect(x, y)
+	{
+		this.level.set(x, y, '.');
+	}
+
 	checkCollision(ax, ay)
 	{
 		let oX = this.x + ax;
@@ -190,14 +205,28 @@ class Player
 		let nX = this.x + this.vx + ax;
 		let nY = this.y + this.vy + ay;
 
-		if (this.level.get(nX, oY) != '.') {
+		let c = this.level.get(nX, oY);
+		if (c != '.') {
+			
+			if (c == '$') {
+				this.collect(nX, oY);
+				return;
+			}
+
 			this.vx = 0;
 			this.newX = Math.floor(oX);
 		}
 
 		nX = this.newX + ax;
 
-		if (this.level.get(nX, nY) != '.') {
+		c = this.level.get(nX, nY);
+		if (c != '.') {
+
+			if (c == '$') {
+				this.collect(nX, nY);
+				return;
+			}
+
 			this.vy = 0;
 			this.newY = Math.floor(oY);
 		}
