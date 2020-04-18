@@ -148,6 +148,7 @@ class Player
 		this.vy = 0;
 		this.width = this.tiles.tileWidth;
 		this.height = this.tiles.tileHeight;
+		this.jumping = false;
 	}
 
 	decel()
@@ -182,10 +183,14 @@ class Player
 		this.vx = Utils.clamp(this.vx, -.3, .3);
 
 		//y
-		if (this.game.kbmap['ArrowUp']) this.vy -= 0.06;
+		if (this.game.kbmap['ArrowUp'] && !this.jumping) {
+			this.jumping = true;
+			this.vy -= 0.5;
+		}
+
 		this.vy += 0.03;
 		
-		this.vy = Utils.clamp(this.vy, -.3, .3);
+		this.vy = Utils.clamp(this.vy, -3, 3);
 
 		this.decel();
 
@@ -236,6 +241,7 @@ class Player
 			}
 
 			this.vy = 0;
+			if (ay > 0) this.jumping = false;
 			this.newY = Math.floor(oY);
 		}
 	}
