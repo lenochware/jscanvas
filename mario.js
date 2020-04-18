@@ -20,11 +20,11 @@ class Main extends NextGame {
 			".....#.............................................",
 			"...................................................",
 			"...................................................",
-			"...................................................",
-			"...................................................",
-			"......................$.$..........................",
-			".....................$.$.$.........................",
-			"...................WWWWWWWWWW......................",
+			"..........................................?........",
+			".........................................?.........",
+			"......................$.$...............?..........",
+			".....................$.$.$.............?...........",
+			"...................WWWWWWWWWW.........?............",
 			"...###...#.#.....................#?#...............",
 			"...................................................",
 			"..............#....................................",
@@ -44,15 +44,16 @@ class Main extends NextGame {
 	{
 		this.requestUpdate();
 		this.canvas.fill('lightblue');
-		this.canvas.text(10, 10, 'white', this.player.x + ', ' + this.player.y);
 
 		this.player.update();
-
+		
 		this.level.setPos(this.player.x - 10, this.player.y - 3);
 
 		this.level.draw();
 		if (this.frameCount % 5 == 0) this.player.nextFrame();
 		this.player.draw();
+
+		this.canvas.text(10, 10, 'white', this.player.x + ', ' + this.player.y);
 
 		if (this.kb.key == 'SomeKey') {
 			this.kb.key = '';
@@ -100,7 +101,7 @@ class Level
 		let tx = Math.floor(x);
 		let ty = Math.floor(y);
 
-		if (tx < 0 || ty < 0 || tx > this.width || ty > this.height) return null;
+		if (tx < 0 || ty < 0 || tx >= this.width || ty >= this.height) return 'x';
 
 		return this.map[ty][tx];
 	}
@@ -119,10 +120,10 @@ class Level
 	{
 		let ti = {"#": 3, "?": 0, "$": 26, "W": 6};
 
-		for(let y = 0; y < this.view.height; y++) {
+		for(let y = 0; y < this.view.height + 1; y++) {
 			for (let x = 0; x < this.view.width; x++)
 			{
-				let c = this.map[y + ~~this.view.y][x + ~~this.view.x];
+				let c = this.get(x + this.view.x, y + this.view.y);
 				if (c == '.') continue;
 				
 				this.tileSet.draw(ti[c], 
@@ -159,8 +160,8 @@ class Player
 		this.vy = this.vy - Math.sign(this.vy) * 0.01;
 		if (Math.abs(this.vy) < 0.01) this.vy = 0;
 			
-		if (!this.vx && Math.abs(this.x - Math.round(this.x)) < 0.126) this.x = Math.round(this.x);
-		if (!this.vy && Math.abs(this.y - Math.round(this.y)) < 0.126) this.y = Math.round(this.y);
+		// if (!this.vx && Math.abs(this.x - Math.round(this.x)) < 0.126) this.x = Math.round(this.x);
+		// if (!this.vy && Math.abs(this.y - Math.round(this.y)) < 0.126) this.y = Math.round(this.y);
 	}
 
 	nextFrame()
@@ -179,7 +180,7 @@ class Player
 		if (this.game.kbmap['ArrowRight']) {
 			this.vx += 0.03;
 		}
-		
+	
 		this.vx = Utils.clamp(this.vx, -.3, .3);
 
 		//y
@@ -204,6 +205,10 @@ class Player
 
 		this.x = this.newX;
 		this.y = this.newY;
+
+		//fix floating point blur error
+		this.x = Math.trunc(this.x * 16) / 16;
+		this.y = Math.trunc(this.y * 16) / 16;
 	}
 
 	collect(x, y)
