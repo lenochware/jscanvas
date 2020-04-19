@@ -9,10 +9,10 @@ class Main extends NextGame {
 		this.canvas.height(300);
 		this.frameCount = 0;
 
-		let tileSet = new Tileset(this, this.assets.tiles, 26, 24);
+		let levelTiles = new Tileset(this, this.assets.tiles, 26, 24);
 		let playerTiles = new Tileset(this, this.assets.player, 28, 1);
 
-		this.level = new Level(tileSet, [
+		this.level = new Level(levelTiles, [
 			".....#.............................................",
 			".....#.............................................",
 			".....#.............................................",
@@ -54,16 +54,7 @@ class Main extends NextGame {
 		this.player.draw();
 
 		this.canvas.text(10, 10, 'white', this.player.x + ', ' + this.player.y);
-
-		if (this.kb.key == 'SomeKey') {
-			this.kb.key = '';
-		};
-
-		if (this.mouse.buttons) {
-			this.mouse.buttons = 0;
-		}
 		
-		this.time = this.now();
 		this.frameCount++;
 	}
 }
@@ -150,14 +141,19 @@ class Player
 		this.width = this.tiles.tileWidth;
 		this.height = this.tiles.tileHeight;
 		this.jumping = false;
+		this.facing = 1;
 	}
 
 	decel()
 	{
+		//friction
 		this.vx = this.vx - Math.sign(this.vx) * 0.01;
 		if (Math.abs(this.vx) < 0.01) this.vx = 0;
 
-		this.vy = this.vy - Math.sign(this.vy) * 0.01;
+		//gravity
+		this.vy += 0.01;
+		this.vy = Utils.clamp(this.vy, -3, 3);
+
 		if (Math.abs(this.vy) < 0.01) this.vy = 0;
 			
 		// if (!this.vx && Math.abs(this.x - Math.round(this.x)) < 0.126) this.x = Math.round(this.x);
@@ -166,7 +162,11 @@ class Player
 
 	nextFrame()
 	{
-		if (this.vx == 0) return;
+		if (this.vx == 0) {
+			this.frame = (this.facing == 1)? 13 : 12;
+			return;
+		}
+
 		this.frame = (this.frame + 1) % 5;
 	}
 
@@ -174,11 +174,12 @@ class Player
 	{
 		if (this.game.kbmap['ArrowLeft']) {
 			this.vx -= 0.03;
-			//this.frame = 2;
+			this.facing = -1;
 		}
 
 		if (this.game.kbmap['ArrowRight']) {
 			this.vx += 0.03;
+			this.facing = 1;
 		}
 	
 		this.vx = Utils.clamp(this.vx, -.3, .3);
@@ -186,12 +187,8 @@ class Player
 		//y
 		if (this.game.kbmap['ArrowUp'] && !this.jumping) {
 			this.jumping = true;
-			this.vy -= 0.5;
+			this.vy -= 0.3;
 		}
-
-		this.vy += 0.03;
-		
-		this.vy = Utils.clamp(this.vy, -3, 3);
 
 		this.decel();
 
