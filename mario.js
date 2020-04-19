@@ -279,3 +279,26 @@ class Tileset
 		this.canvas.context.drawImage(this.image, sx, sy, this.tileWidth, this.tileHeight, dx, dy, this.tileWidth, this.tileHeight);
 	}
 }
+
+class Anim extends Tileset
+{
+	constructor(game, asset, x, y, scenes)
+	{
+		super(game, asset, x, y);
+		this.frame = 0;
+		this.scenes = scenes;
+		this.current = Object.values(scenes)[0];
+	}
+
+	nextFrame()
+	{
+		this.frame = (this.frame + 1) % this.current.length + this.current.start;
+	}
+
+	draw(dx, dy)
+	{
+		let sx = this.frame % this.x * this.tileWidth;
+		let sy = Math.floor(this.frame / this.x) * this.tileHeight;
+		this.canvas.context.drawImage(this.image, sx, sy, this.tileWidth, this.tileHeight, dx, dy, this.tileWidth, this.tileHeight);
+	}
+}
