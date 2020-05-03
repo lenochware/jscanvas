@@ -10,7 +10,6 @@ class Main extends NextGame {
 		this.frameCount = 0;
 
 		let levelTiles = new Tileset(this, this.assets.tiles, 26, 24);
-		let playerTiles = new Tileset(this, this.assets.player, 28, 1);
 
 		this.level = new Level(levelTiles, [
 			".....#.............................................",
@@ -31,7 +30,16 @@ class Main extends NextGame {
 			"###################################################",
 		]);
 
-		this.player = new Player(this, playerTiles, 5, 5);
+		let playerAnim = new Anim(this, this.assets.player, 28, 1, {
+			standLeft: [13, 1],
+			standRight: [14, 1],
+			runLeft: [1, 5],
+			runRight: [22, 5],
+			jumpLeft: [1, 1],
+			jumpRight: [22, 1]
+		});
+
+		this.player = new Player(this, playerAnim, 5, 5);
 	}
 
 	preload()
@@ -50,7 +58,6 @@ class Main extends NextGame {
 		this.level.setPos(this.player.x - 10, this.player.y - 3);
 
 		this.level.draw();
-		if (this.frameCount % 5 == 0) this.player.nextFrame();
 		this.player.draw();
 
 		this.canvas.text(10, 10, 'white', this.player.x + ', ' + this.player.y);
@@ -128,18 +135,18 @@ class Level
 
 class Player
 {
-	constructor(game, tiles, x, y)
+	constructor(game, anim, x, y)
 	{
 		this.game = game;
 		this.level = game.level;
-		this.tiles = tiles;
+		this.anim = anim;
 		this.frame = 2;
 		this.x = x;
 		this.y = y;
 		this.vx = 0;
 		this.vy = 0;
-		this.width = this.tiles.tileWidth;
-		this.height = this.tiles.tileHeight;
+		this.width = this.anim.tileWidth;
+		this.height = this.anim.tileHeight;
 		this.jumping = false;
 		this.facing = 1;
 	}
@@ -160,16 +167,6 @@ class Player
 		// if (!this.vy && Math.abs(this.y - Math.round(this.y)) < 0.126) this.y = Math.round(this.y);
 	}
 
-	nextFrame()
-	{
-		if (this.vx == 0) {
-			this.frame = (this.facing == 1)? 13 : 12;
-			return;
-		}
-
-		this.frame = (this.frame + 1) % 5;
-	}
-
 	update()
 	{
 		if (this.game.kbmap['ArrowLeft']) {
@@ -184,11 +181,30 @@ class Player
 	
 		this.vx = Utils.clamp(this.vx, -.3, .3);
 
+		
 		//y
 		if (this.game.kbmap['ArrowUp'] && !this.jumping) {
 			this.jumping = true;
 			this.vy -= 0.3;
 		}
+
+		let anim = '';
+
+		if (this.jumping) {
+			anim = (this.facing == 1)? 'jumpRight' : 'jumpLeft';
+		}
+		else if (this.vx == 0) {
+			anim = (this.facing == 1)? 'standRight' : 'standLeft';
+		}
+		else {
+			anim = (this.vx > 0)? 'runRight' : 'runLeft';
+		}
+
+		if (this.game.frameCount % 5 == 0) {
+			this.anim.nextFrame();
+		}
+
+		if (this.anim.name != anim) this.anim.play(anim);
 
 		this.decel();
 
@@ -250,9 +266,7 @@ class Player
 
 	draw()
 	{
-		let frame = (this.vx > 0)? this.frame + 22 : this.frame + 1;
-
-		this.tiles.draw(frame, 
+		this.anim.draw(
 			Math.floor((this.x - this.level.view.x) * this.level.tileWidth), 
 			Math.floor((this.y - this.level.view.y) * this.level.tileHeight)
 		);
@@ -287,16 +301,22 @@ class Anim extends Tileset
 		super(game, asset, x, y);
 		this.frame = 0;
 		this.clips = clips;
-		this.clip = Object.values(clips)[0];
+		this.name = Object.keys(clips)[0];
 	}
 
-	update()
+	play(name)
 	{
-		this.frame = (this.frame + 1) % this.clip[1] + this.clip[0];
+		this.name = name;
+		this.frame = 0;
+	}
+
+	nextFrame()
+	{
+		this.frame = (this.frame + 1) % this.clips[this.name][1];
 	}
 
 	draw(dx, dy)
 	{
-		super.draw(this.frame, dx, dy);
+		super.draw(this.frame + this.clips[this.name][0], dx, dy);
 	}
 }
