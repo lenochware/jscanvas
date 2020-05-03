@@ -282,23 +282,21 @@ class Tileset
 
 class Anim extends Tileset
 {
-	constructor(game, asset, x, y, scenes)
+	constructor(game, asset, x, y, clips)
 	{
 		super(game, asset, x, y);
 		this.frame = 0;
-		this.scenes = scenes;
-		this.current = Object.values(scenes)[0];
+		this.clips = clips;
+		this.clip = Object.values(clips)[0];
 	}
 
-	nextFrame()
+	update()
 	{
-		this.frame = (this.frame + 1) % this.current.length + this.current.start;
+		this.frame = (this.frame + 1) % this.clip[1] + this.clip[0];
 	}
 
 	draw(dx, dy)
 	{
-		let sx = this.frame % this.x * this.tileWidth;
-		let sy = Math.floor(this.frame / this.x) * this.tileHeight;
-		this.canvas.context.drawImage(this.image, sx, sy, this.tileWidth, this.tileHeight, dx, dy, this.tileWidth, this.tileHeight);
+		super.draw(this.frame, dx, dy);
 	}
 }
