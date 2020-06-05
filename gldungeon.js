@@ -7,7 +7,8 @@ class Main extends NextGameGL {
 		super.init();
 
 		const textureLoader = new THREE.TextureLoader();
-		this.textures.wall = textureLoader.load( 'images/wallset_csb_front1.png' );
+		this.textures.wall = textureLoader.load( 'images/wallset_csb_front2.png' );
+		this.textures.wall.anisotropy = 16;
 
 		var geometry = new THREE.BoxGeometry(2,2,2);
 		var material = new THREE.MeshLambertMaterial( { map: this.textures.wall, color: '#FFFFFF' } );
@@ -43,8 +44,8 @@ class Main extends NextGameGL {
 			this.mouse.buttons = 0;
 		}
 
-		this.cube.rotation.x += 0.01;
-		this.cube.rotation.y += 0.01;
+		this.cube.rotation.x = this.mouse.y / 200;
+		this.cube.rotation.y = this.mouse.x / 200;
 
 		this.renderer.render( this.scene, this.camera );
 

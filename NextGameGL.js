@@ -5,6 +5,7 @@ class NextGameGL {
 		this.scene = null;
 		this.camera = null;
 		this.renderer = null;
+		this.canvas = null;
 		this.textures = {};
 
 		this.mouse = null;
@@ -29,9 +30,9 @@ class NextGameGL {
 		this.initMouse();
 		this.initThreeJs();
 
-		// this.canvas.on('mousedown', e => this.getMouseButtons(e));
-		// this.canvas.on('mouseup', e => this.mouseUp(e));
-		// this.canvas.on('mousemove', e => this.getMousePos(e));
+		$(this.canvas).on('mousedown', e => this.getMouseButtons(e));
+		$(this.canvas).on('mouseup', e => this.mouseUp(e));
+		$(this.canvas).on('mousemove', e => this.getMousePos(e));
 		$(window).bind('wheel', e => this.getWheel(e));
 
 		this.requestUpdate();
@@ -51,7 +52,9 @@ class NextGameGL {
 
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
-		document.body.appendChild( this.renderer.domElement );		
+		console.log(this.renderer.getMaxAnisotropy());
+		this.canvas = this.renderer.domElement;
+		document.body.appendChild( this.canvas );
 	}
 
 	initKeyboard()
@@ -102,8 +105,8 @@ class NextGameGL {
 
 	getMousePos(e)
 	{
-    let scaleX = this.canvas.width() / this.canvas.screenWidth();
-    let scaleY = this.canvas.height() / this.canvas.screenHeight();
+    let scaleX = this.canvas.width / window.innerWidth;
+    let scaleY = this.canvas.height / window.innerHeight;
     let m = this.mouse;
 		
 		m.x = Math.floor(e.offsetX * scaleX);
