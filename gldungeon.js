@@ -7,6 +7,7 @@ class Main extends NextGameGL {
 		super.init();
 
 		this.objects = {};
+		this.light = null;
 
 		const textureLoader = new THREE.TextureLoader();
 
@@ -37,24 +38,36 @@ class Main extends NextGameGL {
 	addLights()
 	{
 		// create a point light
-		const pointLight = new THREE.PointLight(0xFFFFFF, 1);
+		this.light = new THREE.PointLight(0xFFFFFF, 1);
 
 		// set its position
-		pointLight.position.x = 10;
-		pointLight.position.y = 50;
-		pointLight.position.z = 130;
+		this.light.position.x = 10;
+		this.light.position.y = 50;
+		this.light.position.z = 130;
 
 		// add to the scene
-		this.scene.add(pointLight);		
+		this.scene.add(this.light);		
 	}
 
 	update()
 	{
 		this.requestUpdate();
 
-		if (this.kb.key == 'SomeKey') {
-			this.kb.key = '';
-		};
+		if (this.kbmap['ArrowUp']) {
+			this.camera.position.z -= 0.1;
+		}
+
+		if (this.kbmap['ArrowDown']) {
+			this.camera.position.z += 0.1;
+		}
+
+		if (this.kbmap['ArrowLeft']) {
+			this.camera.position.x -= 0.1;
+		}
+
+		if (this.kbmap['ArrowRight']) {
+			this.camera.position.x += 0.1;
+		}
 
 		if (this.mouse.buttons) {
 			this.mouse.buttons = 0;
@@ -62,6 +75,12 @@ class Main extends NextGameGL {
 
 		this.camera.rotation.x = this.mouse.y / 400 - 1;
 		this.camera.rotation.y = this.mouse.x / 800 - 1;
+
+		this.light.position.set(
+			this.camera.position.x,
+			this.camera.position.y,
+			this.camera.position.z
+		)  
 
 		this.renderer.render( this.scene, this.camera );
 
