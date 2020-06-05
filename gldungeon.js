@@ -6,16 +6,32 @@ class Main extends NextGameGL {
 	{
 		super.init();
 
+		this.objects = {};
+
 		const textureLoader = new THREE.TextureLoader();
-		this.textures.wall = textureLoader.load( 'images/wallset_csb_front2.png' );
-		this.textures.wall.anisotropy = 16;
 
-		var geometry = new THREE.BoxGeometry(2,2,2);
-		var material = new THREE.MeshLambertMaterial( { map: this.textures.wall, color: '#FFFFFF' } );
-		this.cube = new THREE.Mesh( geometry, material );
-		this.scene.add( this.cube );
+		let wall = {};
 
+		wall.texture = textureLoader.load( 'images/wallset_csb_front2.png' );
+		wall.texture.anisotropy = 16;
+		wall.geometry = new THREE.BoxGeometry(2,2,2);
+		wall.material = new THREE.MeshLambertMaterial( { map: wall.texture, color: '#FFFFFF' } );
+
+		this.objects.wall = wall;
+
+		this.createScene();
 		this.addLights();
+	}
+
+	createScene()
+	{
+		let wall = this.objects.wall;
+		let m = new THREE.Mesh( wall.geometry, wall.material );
+		this.scene.add(m);
+	}
+
+	addWall(x, y, n)
+	{
 	}
 
 	addLights()
@@ -44,8 +60,8 @@ class Main extends NextGameGL {
 			this.mouse.buttons = 0;
 		}
 
-		this.cube.rotation.x = this.mouse.y / 200;
-		this.cube.rotation.y = this.mouse.x / 200;
+		this.camera.rotation.x = this.mouse.y / 400 - 1;
+		this.camera.rotation.y = this.mouse.x / 800 - 1;
 
 		this.renderer.render( this.scene, this.camera );
 

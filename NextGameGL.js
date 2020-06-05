@@ -6,7 +6,6 @@ class NextGameGL {
 		this.camera = null;
 		this.renderer = null;
 		this.canvas = null;
-		this.textures = {};
 
 		this.mouse = null;
 		this.kb = { key: ''};
@@ -52,7 +51,6 @@ class NextGameGL {
 
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
-		console.log(this.renderer.getMaxAnisotropy());
 		this.canvas = this.renderer.domElement;
 		document.body.appendChild( this.canvas );
 	}
