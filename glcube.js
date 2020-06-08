@@ -22,7 +22,7 @@ class Main extends NextGameGL {
 		let texture = textureLoader.load( 'images/wallset_csb_front2.png' );
 		texture.anisotropy = 16;
 		
-		let geometry = new THREE.BoxGeometry(2,2,2);
+		let geometry = new THREE.BoxGeometry(1,1,1);
 		let material = new THREE.MeshLambertMaterial( { map: texture, color: '#FFFFFF' } );
 
 		this.mesh.cube = new THREE.Mesh( geometry, material );
@@ -31,8 +31,15 @@ class Main extends NextGameGL {
 	createScene()
 	{
 		let m = this.mesh.cube.clone();
+		m.position.x -= 1;
 		this.scene.add(m);
 		this.objects.push(m);
+
+		m = this.mesh.cube.clone();
+		m.position.x += 1;
+		this.scene.add(m);
+		this.objects.push(m);
+
 	}
 
 	addLights()
