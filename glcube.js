@@ -28,49 +28,49 @@ class Main extends NextGameGL {
 		const mat1 = new THREE.MeshLambertMaterial( { map: texture, color: '#FFFFFF' } );
 
 		const mat2 = new THREE.MeshBasicMaterial({
-		  map: new THREE.CanvasTexture(this.canvas2d),
+			map: new THREE.CanvasTexture(this.canvas2d),
 		});
 
-	  const fragmentShader = `
-	  #include <common>
+		const fragmentShader = `
+		#include <common>
 
-	  uniform vec3 iResolution;
-	  uniform float iTime;
+		uniform vec3 iResolution;
+		uniform float iTime;
 
-	  // By iq: https://www.shadertoy.com/user/iq  
-	  // license: Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
-	  void mainImage( out vec4 fragColor, in vec2 fragCoord )
-	  {
-	      // Normalized pixel coordinates (from 0 to 1)
-	      vec2 uv = fragCoord/iResolution.xy;
+		// By iq: https://www.shadertoy.com/user/iq  
+		// license: Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+		void mainImage( out vec4 fragColor, in vec2 fragCoord )
+		{
+				// Normalized pixel coordinates (from 0 to 1)
+				vec2 uv = fragCoord/iResolution.xy;
 
-	      // Time varying pixel color
-	      vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
+				// Time varying pixel color
+				vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
 
-	      // Output to screen
-	      fragColor = vec4(col,1.0);
-	  }
+				// Output to screen
+				fragColor = vec4(col,1.0);
+		}
 
-	  void main() {
-	    mainImage(gl_FragColor, gl_FragCoord.xy);
-	  }
-	  `;
-	  
-	  const uniforms = {
-	    iTime: { value: 0 },
-	    iResolution:  { value: new THREE.Vector3(300,300,1) },
-	  };
+		void main() {
+			mainImage(gl_FragColor, gl_FragCoord.xy);
+		}
+		`;
+		
+		const uniforms = {
+			iTime: { value: 0 },
+			iResolution:  { value: new THREE.Vector3(300,300,1) },
+		};
 
-	  const mat3 = new THREE.ShaderMaterial({
-	    fragmentShader,
-	    uniforms,
-	  });
+		const mat3 = new THREE.ShaderMaterial({
+			fragmentShader,
+			uniforms,
+		});
 
-	  this.mesh = {
-	  	cube1: new THREE.Mesh( box, mat1 ),
-	  	cube2: new THREE.Mesh( box, mat2 ),
-	  	cube3: new THREE.Mesh( box, mat3 ),
-	  }
+		this.mesh = {
+			cube1: new THREE.Mesh( box, mat1 ),
+			cube2: new THREE.Mesh( box, mat2 ),
+			cube3: new THREE.Mesh( box, mat3 ),
+		}
 	}
 
 	createScene()
@@ -121,22 +121,22 @@ class Main extends NextGameGL {
 
 	drawCanvas()
 	{
-    let ctx = this.canvas2d.getContext('2d');
-    ctx.fillStyle = '#' + Utils.random(0, 0x1000000).toString(16).padStart(6, '0');
-    ctx.beginPath();
+		let ctx = this.canvas2d.getContext('2d');
+		ctx.fillStyle = '#' + Utils.random(0, 0x1000000).toString(16).padStart(6, '0');
+		ctx.beginPath();
 
-    const x = Utils.random(0, 256);
-    const y = Utils.random(0, 256);
-    const radius = Utils.random(10, 64);
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
+		const x = Utils.random(0, 256);
+		const y = Utils.random(0, 256);
+		const radius = Utils.random(10, 64);
+		ctx.arc(x, y, radius, 0, Math.PI * 2);
+		ctx.fill();
 	}
 
 	updateShader()
 	{
 		let mat3 = this.mesh.cube3.material;
 		//console.log(this.time/1000);
-    mat3.uniforms.iTime.value += 0.01;
+		mat3.uniforms.iTime.value += 0.01;
 	}
 
 	update()
