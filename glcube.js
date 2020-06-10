@@ -19,34 +19,42 @@ class Main extends NextGameGL {
 
 	initMesh()
 	{
-		const textureLoader = new THREE.TextureLoader();
+		let box = new THREE.BoxGeometry(1,1,1);
 
+		const textureLoader = new THREE.TextureLoader();
 		let texture = textureLoader.load( 'images/wallset_csb_front2.png' );
 		texture.anisotropy = 16;
-		
-		let geometry = new THREE.BoxGeometry(1,1,1);
-		let material = new THREE.MeshLambertMaterial( { map: texture, color: '#FFFFFF' } );
 
-		this.mesh.cube = new THREE.Mesh( geometry, material );
+		const mat1 = new THREE.MeshLambertMaterial( { map: texture, color: '#FFFFFF' } );
 
-
-		const material2 = new THREE.MeshBasicMaterial({
+		const mat2 = new THREE.MeshBasicMaterial({
 		  map: new THREE.CanvasTexture(this.canvas2d),
 		});
 
-		this.mesh.drawCube = new THREE.Mesh( geometry, material2 );
+	  // const mat3 = new THREE.ShaderMaterial({
+	  //   fragmentShader,
+	  //   uniforms,
+	  // });
 
+	  this.mesh = {
+	  	cube: new THREE.Mesh( box, mat1 ),
+	  	drawCube: new THREE.Mesh( box, mat2 ),
+	  }
 	}
 
 	createScene()
 	{
 		let m = this.mesh.cube.clone();
-		m.position.x -= 1;
+		this.scene.add(m);
+		this.objects.push(m);
+
+		m = this.mesh.cube.clone();
+		m.position.x -= 1.5;
 		this.scene.add(m);
 		this.objects.push(m);
 
 		m = this.mesh.drawCube.clone();
-		m.position.x += 1;
+		m.position.x += 1.5;
 		m.userData.updateTexture = true;
 		this.scene.add(m);
 		this.objects.push(m);
