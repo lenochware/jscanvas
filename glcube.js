@@ -31,31 +31,62 @@ class Main extends NextGameGL {
 		  map: new THREE.CanvasTexture(this.canvas2d),
 		});
 
-	  // const mat3 = new THREE.ShaderMaterial({
-	  //   fragmentShader,
-	  //   uniforms,
-	  // });
+	  const fragmentShader = `
+	  #include <common>
+
+	  uniform vec3 iResolution;
+	  uniform float iTime;
+
+	  // By iq: https://www.shadertoy.com/user/iq  
+	  // license: Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+	  void mainImage( out vec4 fragColor, in vec2 fragCoord )
+	  {
+	      // Normalized pixel coordinates (from 0 to 1)
+	      vec2 uv = fragCoord/iResolution.xy;
+
+	      // Time varying pixel color
+	      vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
+
+	      // Output to screen
+	      fragColor = vec4(col,1.0);
+	  }
+
+	  void main() {
+	    mainImage(gl_FragColor, gl_FragCoord.xy);
+	  }
+	  `;
+	  
+	  const uniforms = {
+	    iTime: { value: 0 },
+	    iResolution:  { value: new THREE.Vector3(300,300,1) },
+	  };
+
+	  const mat3 = new THREE.ShaderMaterial({
+	    fragmentShader,
+	    uniforms,
+	  });
 
 	  this.mesh = {
-	  	cube: new THREE.Mesh( box, mat1 ),
-	  	drawCube: new THREE.Mesh( box, mat2 ),
+	  	cube1: new THREE.Mesh( box, mat1 ),
+	  	cube2: new THREE.Mesh( box, mat2 ),
+	  	cube3: new THREE.Mesh( box, mat3 ),
 	  }
 	}
 
 	createScene()
 	{
-		let m = this.mesh.cube.clone();
+		let m = this.mesh.cube1.clone();
 		this.scene.add(m);
 		this.objects.push(m);
 
-		m = this.mesh.cube.clone();
-		m.position.x -= 1.5;
-		this.scene.add(m);
-		this.objects.push(m);
-
-		m = this.mesh.drawCube.clone();
+		m = this.mesh.cube2.clone();
 		m.position.x += 1.5;
 		m.userData.updateTexture = true;
+		this.scene.add(m);
+		this.objects.push(m);
+
+		m = this.mesh.cube3.clone();
+		m.position.x -= 1.5;
 		this.scene.add(m);
 		this.objects.push(m);
 
@@ -101,11 +132,19 @@ class Main extends NextGameGL {
     ctx.fill();
 	}
 
+	updateShader()
+	{
+		let mat3 = this.mesh.cube3.material;
+		//console.log(this.time/1000);
+    mat3.uniforms.iTime.value += 0.01;
+	}
+
 	update()
 	{
 		this.requestUpdate();
 
 		this.drawCanvas();
+		this.updateShader();
 
 		if (this.kbmap['ArrowUp']) {
 			this.camera.position.z -= 0.1;
@@ -125,8 +164,8 @@ class Main extends NextGameGL {
 		for (let o of this.objects) {
 			if (o.userData.updateTexture) o.material.map.needsUpdate = true;
 
-			o.rotation.x += 0.01;
-			o.rotation.y += 0.01;
+			// o.rotation.x += 0.01;
+			// o.rotation.y += 0.01;
 		}
 
 		this.renderer.render( this.scene, this.camera );
