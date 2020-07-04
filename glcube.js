@@ -31,29 +31,56 @@ class Main extends NextGameGL {
 			map: new THREE.CanvasTexture(this.canvas2d),
 		});
 
+		// varying vec3 vUv = position; take zajimavy efekt 
+		const vertexShader = `
+    varying vec2 vUv; 
+
+    void main() {
+      vUv = uv; 
+
+      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_Position = projectionMatrix * modelViewPosition; 
+    }
+  `;
+
 		const fragmentShader = `
 		#include <common>
 
 		uniform vec3 iResolution;
 		uniform float iTime;
+		varying vec2 vUv;
 
-		// By iq: https://www.shadertoy.com/user/iq  
-		// license: Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+		#define S(a, b, t) smoothstep(a, b, t);
+
+		vec3 Circle(vec2 uv, float t)
+		{
+		    float d = length(uv);
+		    return (0.5 + 0.5*cos(t+uv.xyx+vec3(0,2,4))) * S(0.5, 0.3, d);
+		}
+
 		void mainImage( out vec4 fragColor, in vec2 fragCoord )
 		{
-				// Normalized pixel coordinates (from 0 to 1)
-				vec2 uv = fragCoord/iResolution.xy;
+		    // Normalized pixel coordinates (from 0 to 1)
+		    vec2 uv = vUv.xy;//fragCoord/iResolution.xy;
+		    
+		    float t = iTime;
+		    
+		    uv -= 0.5;
+		    uv.x *= iResolution.x/iResolution.y;
+		    
+		    //deformuj prostor
+		    uv.y += uv.x * uv.x * sin(2.*t) * 2.;  
+		    uv.x += uv.y * uv.y * sin(2.*t + 2.) * 2.;
+		      
+		    vec3 col = Circle(uv, t);
 
-				// Time varying pixel color
-				vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
-
-				// Output to screen
-				fragColor = vec4(col,1.0);
+		    // Output to screen
+		    fragColor = vec4(col,1.0);
 		}
 
 		void main() {
 			mainImage(gl_FragColor, gl_FragCoord.xy);
-		}
+		}		
 		`;
 		
 		const uniforms = {
@@ -63,6 +90,7 @@ class Main extends NextGameGL {
 
 		const mat3 = new THREE.ShaderMaterial({
 			fragmentShader,
+			vertexShader,
 			uniforms,
 		});
 
