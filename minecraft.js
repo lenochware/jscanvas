@@ -60,36 +60,25 @@ class Main extends NextGameGL {
 		this.scene.add(am);
 	}
 
-	// cameraMove() {
- //    const movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
- //    const movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
-
- //    this._motion.rotation.y += -movementX * Math.PI / 180;
- //    this._motion.rotation.x += -movementY * Math.PI / 180;
-
- //    const euler = new THREE.Euler(0, 0, 0, 'YXZ');
- //    euler.x = this._motion.rotation.x;
- //    euler.y = this._motion.rotation.y;
- //    this.camera.quaternion.setFromEuler(euler);
-
- //    this.camera.rotation.x = Math.min(Math.max(this.camera.rotation.x, -1.0472), 1.0472);
-	// }
-
 	update()
 	{
 		this.requestUpdate();
 
+		this.camera.rotation.x = -(this.mouse.y / window.innerHeight - 0.5) * Utils.TWO_PI;
+		this.camera.rotation.y = -(this.mouse.x / window.innerWidth - 0.5) * Utils.TWO_PI;
+
+		this.camera.rotation.x = Utils.clamp(this.camera.rotation.x, -1.5, 1.5);
 
 		if (this.kbmap['ArrowUp']) {
-			// this.camera.position.x += Math.sin(this.camera.rotation.y) * .1;
-			// this.camera.position.z += -Math.cos(this.camera.rotation.y) * .1;			
-			this.camera.position.z -= 0.1;
+			this.camera.position.x -= Math.sin(this.camera.rotation.y) * .1;
+			this.camera.position.z -= Math.cos(this.camera.rotation.y) * .1;			
+			//this.camera.position.z -= 0.1;
 		}
 
 		if (this.kbmap['ArrowDown']) {
-			// this.camera.position.x -= Math.sin(this.camera.rotation.y) * .1;
-			// this.camera.position.z -= -Math.cos(this.camera.rotation.y) * .1;
-			this.camera.position.z += 0.1;
+			this.camera.position.x += Math.sin(this.camera.rotation.y) * .1;
+			this.camera.position.z += Math.cos(this.camera.rotation.y) * .1;
+			//this.camera.position.z += 0.1;
 		}
 
 
@@ -100,11 +89,6 @@ class Main extends NextGameGL {
 		if (this.kbmap['ArrowRight']) {
 			this.camera.position.x += 0.1;
 		}
-
-		this.camera.rotation.x = -(this.mouse.y / window.innerHeight - 0.5) * Utils.TWO_PI;
-		this.camera.rotation.y = -(this.mouse.x / window.innerWidth - 0.5) * Utils.TWO_PI;
-
-		//this.controls.update();
 
 		if (this.mouse.buttons) {
 			this.mouse.buttons = 0;
