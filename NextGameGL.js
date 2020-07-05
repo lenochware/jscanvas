@@ -55,6 +55,37 @@ class NextGameGL {
 		document.body.appendChild( this.canvas );
 	}
 
+	// width(num)
+	// {
+	// 	if (num) {
+	// 		this.context.canvas.width = num;
+	// 	}
+
+	// 	return this.context.canvas.width;
+	// }
+
+	// height(num)
+	// {
+	// 	if (num) {
+	// 		this.context.canvas.height = num;
+	// 	}
+
+	// 	return this.context.canvas.height;
+	// }
+
+	// screenWidth()
+	// {
+	// 	let r = this.element.getBoundingClientRect();
+	// 	return r.width;
+	// }
+
+	// screenHeight()
+	// {
+	// 	let r = this.element.getBoundingClientRect();
+	// 	return r.height;
+	// }
+
+
 	initKeyboard()
 	{
 		$("body").on('keydown', (e) => {
