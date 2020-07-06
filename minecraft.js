@@ -11,10 +11,12 @@ class Main extends NextGameGL {
 		this.objects = [];
 		this.assets = {}
 
+		const loader = new THREE.TextureLoader();
+
 		let grass = [
-			THREE.ImageUtils.loadTexture('images/grass-top.png'),
-			THREE.ImageUtils.loadTexture('images/grass-side.png'),
-			THREE.ImageUtils.loadTexture('images/dirt.png')
+			loader.load('images/grass-top.png'),
+			loader.load('images/grass-side.png'),
+			loader.load('images/dirt.png')
 		];
 
 		grass[0].magFilter = THREE.NearestFilter;
@@ -41,29 +43,40 @@ class Main extends NextGameGL {
 		this.addLights();
 	}
 
-	addBox(x, y, z, t)
-	{
-		let m = new THREE.Mesh(this.assets.boxGeometry, this.assets.grassMaterial);
-		m.position.set(x, y, z);
-		this.scene.add(m);
-	}
-
 	createScene()
 	{
 		this.scene.background = new THREE.Color( 0x8cc4fe );
 
-		for(let z = 0; z < 20; z++) {
-			for(let x = 0; x < 20; x++) {
-				let y = Math.floor(Utils.perlin.noise(x/10, z/10) * 5);
-				this.addBox(x, y, z, 0);
-			}
-		}
+		this.addChunk(0,0);
+		this.addChunk(0,-20);
 
 		//this.scene.position.set(-10,0,-10);
 		this.camera.position.set(10, 4, 20);
 		this.camera.lookAt(10, 4, 0);
 		this.camera.rotation.order = "YXZ"; 
 		//this.camera.up.set(0,1,0);
+	}
+
+	addBox(group, x, y, z, t)
+	{
+		let m = new THREE.Mesh(this.assets.boxGeometry, this.assets.grassMaterial);
+		m.position.set(x, y, z);
+		group.add(m);
+	}
+
+	addChunk(x, z)
+	{
+		let chunk = new THREE.Group();
+		chunk.name = x+','+z;
+
+		for(let i = 0; i < 20; i++) {
+			for(let j = 0; j < 20; j++) {
+				let y = Math.floor(Utils.perlin.noise((x+j)/10, (z+i)/10) * 5);
+				this.addBox(chunk, x+j, y, z+i, 0);
+			}
+		}
+
+		this.scene.add(chunk);
 	}
 
 	addLights()
@@ -115,6 +128,9 @@ class Main extends NextGameGL {
 		}
 
 		if (this.mouse.buttons) {
+			let chunk = this.scene.getObjectByName("0,-20");
+			this.scene.remove(chunk);
+			console.log('removed.');
 			this.mouse.buttons = 0;
 		}
 
