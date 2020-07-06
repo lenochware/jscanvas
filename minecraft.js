@@ -105,11 +105,13 @@ class Main extends NextGameGL {
 
 
 		if (this.kbmap['ArrowLeft']) {
-			this.camera.position.x -= 0.1;
+			this.camera.position.x -= Math.cos(this.camera.rotation.y) * .1;
+			this.camera.position.z -= -Math.sin(this.camera.rotation.y) * .1;			
 		}
 
 		if (this.kbmap['ArrowRight']) {
-			this.camera.position.x += 0.1;
+			this.camera.position.x += Math.cos(this.camera.rotation.y) * .1;
+			this.camera.position.z += -Math.sin(this.camera.rotation.y) * .1;			
 		}
 
 		if (this.mouse.buttons) {
