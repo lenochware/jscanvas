@@ -103,7 +103,8 @@ class NextGameGL {
 	initMouse()
 	{
 		this.mouse = {
-			x: 0, y: 0, 
+			x: 0, y: 0,
+			vx: 0, vy: 0, 
 			buttons: 0, 
 			deltaY: 0, 
 			clickX: 0, clickY: 0, 
@@ -137,6 +138,10 @@ class NextGameGL {
     let scaleX = this.canvas.width / window.innerWidth;
     let scaleY = this.canvas.height / window.innerHeight;
     let m = this.mouse;
+
+    //pointer lock
+    m.vx += e.originalEvent.movementX;
+    m.vy += e.originalEvent.movementY;
 		
 		m.x = Math.floor(e.offsetX * scaleX);
 		m.y = Math.floor(e.offsetY * scaleY);
