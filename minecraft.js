@@ -11,7 +11,27 @@ class Main extends NextGameGL {
 		this.objects = [];
 		this.assets = {}
 
-		this.assets.boxGeometry = new THREE.BoxGeometry(1,1,1);
+		let grass = [
+			THREE.ImageUtils.loadTexture('images/grass-top.png'),
+			THREE.ImageUtils.loadTexture('images/grass-side.png'),
+			THREE.ImageUtils.loadTexture('images/dirt.png')
+		];
+
+		grass[0].magFilter = THREE.NearestFilter;
+		grass[1].magFilter = THREE.NearestFilter;
+		grass[2].magFilter = THREE.NearestFilter;
+
+		this.assets.grassMaterial = [
+       new THREE.MeshLambertMaterial({ map: grass[1] }),
+       new THREE.MeshLambertMaterial({ map: grass[1] }),
+       new THREE.MeshLambertMaterial({ map: grass[0] }),
+       new THREE.MeshLambertMaterial({ map: grass[1] }),
+       new THREE.MeshLambertMaterial({ map: grass[1] }),
+       new THREE.MeshLambertMaterial({ map: grass[1] }),
+       new THREE.MeshLambertMaterial({ map: grass[2] })
+    ];
+
+		this.assets.boxGeometry = new THREE.BoxBufferGeometry(1,1,1);
 		this.assets.basicMaterial = new THREE.MeshLambertMaterial({color:'#3f3'});
 		//this.assets.basicMaterial = new THREE.MeshNormalMaterial();
 
@@ -23,17 +43,19 @@ class Main extends NextGameGL {
 
 	addBox(x, y, z, t)
 	{
-		let m = new THREE.Mesh(this.assets.boxGeometry, this.assets.basicMaterial);
+		let m = new THREE.Mesh(this.assets.boxGeometry, this.assets.grassMaterial);
 		m.position.set(x, y, z);
 		this.scene.add(m);
 	}
 
 	createScene()
 	{
+		this.scene.background = new THREE.Color( 0x8cc4fe );
+
 		for(let z = 0; z < 20; z++) {
 			for(let x = 0; x < 20; x++) {
 				let y = Math.floor(Utils.perlin.noise(x/10, z/10) * 5);
-				this.addBox(x, 1, z, 0);
+				this.addBox(x, y, z, 0);
 			}
 		}
 
