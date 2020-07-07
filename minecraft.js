@@ -1,4 +1,4 @@
-//Empty template
+const CHUNK_SIZE = 16;
 
 class Main extends NextGameGL {
 
@@ -9,7 +9,7 @@ class Main extends NextGameGL {
 		this.light = null;
 
 		this.cpos = {x:0, z:0};
-		this.chunks = [];
+		this.chunks = {};
 		this.assets = {}
 
 		const loader = new THREE.TextureLoader();
@@ -28,7 +28,6 @@ class Main extends NextGameGL {
        new THREE.MeshLambertMaterial({ map: grass[1] }),
        new THREE.MeshLambertMaterial({ map: grass[1] }),
        new THREE.MeshLambertMaterial({ map: grass[0] }),
-       new THREE.MeshLambertMaterial({ map: grass[1] }),
        new THREE.MeshLambertMaterial({ map: grass[1] }),
        new THREE.MeshLambertMaterial({ map: grass[1] }),
        new THREE.MeshLambertMaterial({ map: grass[2] })
@@ -68,45 +67,40 @@ class Main extends NextGameGL {
 
 	addChunk(x, z)
 	{
-		for (let cpos of this.chunks) {
-			if (!cpos) continue;
-			if (cpos.x == x && cpos.z == z) return;
-		}
+		let name = x+','+z;
+		if (this.chunks[name]) return;
 
 		let chunk = new THREE.Group();
-		chunk.name = x+','+z;
+		chunk.name = name;
+		let heightmap = [];
 
-		for(let i = 0; i < 16; i++) {
-			for(let j = 0; j < 16; j++) {
-				let y = Math.floor(Utils.perlin.noise((x*16+j)/10, (z*16+i)/10) * 16) - 4;
-				this.addBox(chunk, x*16+j, y, z*16+i, 0);
+		for(let i = 0; i < CHUNK_SIZE; i++) {
+			heightmap[i] = [];
+			for(let j = 0; j < CHUNK_SIZE; j++) {
+				let y = Math.floor(Utils.perlin.noise((x*CHUNK_SIZE+j)/10, (z*CHUNK_SIZE+i)/10) * CHUNK_SIZE) - 4;
+				this.addBox(chunk, x*CHUNK_SIZE+j, y, z*CHUNK_SIZE+i, 0);
+				heightmap[i][j] = y;
 			}
 		}
 
 		this.scene.add(chunk);
-		this.chunks.push({x, z});
+		this.chunks[name] = {x, z, heightmap, name};
 	}
 
 	updateChunks(pos)
 	{
-		let cx = Math.floor(pos.x / 16);
-		let cz = Math.floor(pos.z / 16);
+		let cx = Math.floor(pos.x / CHUNK_SIZE);
+		let cz = Math.floor(pos.z / CHUNK_SIZE);
 
 		if (this.cpos.x == cx && this.cpos.z == cz) return;
 
-		this.cpos.x = cx;
-		this.cpos.z = cz;
-
-		console.log(this.cpos, this.chunks);
-
-		for (let i in this.chunks) {
-			let cpos = this.chunks[i];
-			if (!cpos || (Math.abs(cpos.x - cx) < 2 && Math.abs(cpos.z - cz) < 2)) continue;
+		for (let c of Object.values(this.chunks)) {
+			if (Math.abs(c.x - cx) < 2 && Math.abs(c.z - cz) < 2) continue;
 			
 			//remove chunk
-			let chunk = this.scene.getObjectByName(cpos.x + ',' + cpos.z);
+			let chunk = this.scene.getObjectByName(c.name);
 			this.scene.remove(chunk);
-			this.chunks[i] = null;
+			delete this.chunks[c.name];
 		}
 
 		for (let i = -1; i <= 1; i++) {
@@ -114,12 +108,14 @@ class Main extends NextGameGL {
 				this.addChunk(cx + i, cz + j);
 			}
 		}
+
+		this.cpos = this.chunks[cx +','+cz];
 	}
 
 	addLights()
 	{
 		// create a point light
-		this.light = new THREE.PointLight(0xFFFFFF, 1, 15, 1);
+		this.light = new THREE.PointLight(0xFFFFFF, 1, 20);
 		this.light.position.set(10, 50, 130);
 		this.scene.add(this.light);		
 
@@ -135,38 +131,49 @@ class Main extends NextGameGL {
 	{
 		this.requestUpdate();
 
+		let pos = this.camera.position;
+
 		this.camera.rotation.x = -(this.mouse.vy / window.innerHeight - 0.5) * Utils.TWO_PI;
 		this.camera.rotation.y = -(this.mouse.vx / window.innerWidth - 0.5) * Utils.TWO_PI;
 
 		this.camera.rotation.x = Utils.clamp(this.camera.rotation.x, -1.5, 1.5);
 
 		if (this.kbmap['ArrowUp']) {
-			this.camera.position.x -= Math.sin(this.camera.rotation.y) * .1;
-			this.camera.position.z -= Math.cos(this.camera.rotation.y) * .1;	
+			pos.x -= Math.sin(this.camera.rotation.y) * .1;
+			pos.z -= Math.cos(this.camera.rotation.y) * .1;	
 		}
 
 		if (this.kbmap['ArrowDown']) {
-			this.camera.position.x += Math.sin(this.camera.rotation.y) * .1;
-			this.camera.position.z += Math.cos(this.camera.rotation.y) * .1;
+			pos.x += Math.sin(this.camera.rotation.y) * .1;
+			pos.z += Math.cos(this.camera.rotation.y) * .1;
 		}
 
 
 		if (this.kbmap['ArrowLeft']) {
-			this.camera.position.x -= Math.cos(this.camera.rotation.y) * .1;
-			this.camera.position.z -= -Math.sin(this.camera.rotation.y) * .1;			
+			pos.x -= Math.cos(this.camera.rotation.y) * .1;
+			pos.z -= -Math.sin(this.camera.rotation.y) * .1;			
 		}
 
 		if (this.kbmap['ArrowRight']) {
-			this.camera.position.x += Math.cos(this.camera.rotation.y) * .1;
-			this.camera.position.z += -Math.sin(this.camera.rotation.y) * .1;			
+			pos.x += Math.cos(this.camera.rotation.y) * .1;
+			pos.z += -Math.sin(this.camera.rotation.y) * .1;			
 		}
 
-		this.updateChunks(this.camera.position);
+		this.updateChunks(pos);
+
+		if (this.cpos.heightmap) {
+			let hz = Math.floor(pos.z % 16);
+			let hx = Math.floor(pos.x % 16);
+			console.log(hz, hx);
+			pos.y = this.cpos.heightmap[hz][hx] + 2;
+			console.log(pos.y);
+
+		}
 
 		this.light.position.set(
-			this.camera.position.x,
-			this.camera.position.y + 5,
-			this.camera.position.z + 2,
+			pos.x,
+			pos.y + 6,
+			pos.z + 2,
 		);
 
 		if (this.mouse.buttons) {
