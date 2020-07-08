@@ -74,6 +74,24 @@ class Main extends NextGameGL {
 		return (y > h)? 0 : 1;
 	}
 
+	getBlocks(x, y, z)
+	{
+		let b = {};
+		b.id = this.getBlock(x, y, z);
+
+		b.nx = this.getBlock(x-1, y, z);
+		b.px = this.getBlock(x+1, y, z);
+		b.ny = this.getBlock(x, y-1, z);
+		b.py = this.getBlock(x, y+1, z);
+		b.nz = this.getBlock(x, y, z-1);
+		b.pz = this.getBlock(x, y, z+1);
+
+		b.hidden = (b.nx && b.px && b.ny && b.py && b.nz && b.pz);
+
+		return b;
+	}
+
+
 	addChunk(x, z)
 	{
 		let name = x+','+z;
@@ -81,19 +99,16 @@ class Main extends NextGameGL {
 
 		let chunk = new THREE.Group();
 		chunk.name = name;
-		//let heightmap = [];
 
 		let cx = x*CHUNK_SIZE;
 		let cz = z*CHUNK_SIZE;
 
 		for(let i = 0; i < CHUNK_SIZE; i++) {
-			//heightmap[i] = [];
 			for(let j = 0; j < CHUNK_SIZE; j++) {
 				for(let y = HEIGHT_MAX; y > HEIGHT_MIN; y--) {
-					let b = this.getBlock(cx+j, y, cz+i);
-					if (b == 0) continue;
+					let b = this.getBlocks(cx+j, y, cz+i);
+					if (b.id == 0 || b.hidden) continue;
 					this.addBox(chunk, cx+j, y, cz+i, b);
-					break;
 				}
 			}
 		}
