@@ -1,4 +1,6 @@
 const CHUNK_SIZE = 16;
+const HEIGHT_MAX = 12;
+const HEIGHT_MIN = -4;
 
 class Main extends NextGameGL {
 
@@ -65,6 +67,13 @@ class Main extends NextGameGL {
 		group.add(m);
 	}
 
+	getBlock(x, y, z)
+	{
+		if (y < HEIGHT_MIN) return 1;
+		let h = Math.floor(Utils.perlin.noise(x/10, z/10) * (HEIGHT_MAX - HEIGHT_MIN)) + HEIGHT_MIN;
+		return (y > h)? 0 : 1;
+	}
+
 	addChunk(x, z)
 	{
 		let name = x+','+z;
@@ -72,19 +81,25 @@ class Main extends NextGameGL {
 
 		let chunk = new THREE.Group();
 		chunk.name = name;
-		let heightmap = [];
+		//let heightmap = [];
+
+		let cx = x*CHUNK_SIZE;
+		let cz = z*CHUNK_SIZE;
 
 		for(let i = 0; i < CHUNK_SIZE; i++) {
-			heightmap[i] = [];
+			//heightmap[i] = [];
 			for(let j = 0; j < CHUNK_SIZE; j++) {
-				let y = Math.floor(Utils.perlin.noise((x*CHUNK_SIZE+j)/10, (z*CHUNK_SIZE+i)/10) * CHUNK_SIZE) - 4;
-				this.addBox(chunk, x*CHUNK_SIZE+j, y, z*CHUNK_SIZE+i, 0);
-				heightmap[i][j] = y;
+				for(let y = HEIGHT_MAX; y > HEIGHT_MIN; y--) {
+					let b = this.getBlock(cx+j, y, cz+i);
+					if (b == 0) continue;
+					this.addBox(chunk, cx+j, y, cz+i, b);
+					break;
+				}
 			}
 		}
 
 		this.scene.add(chunk);
-		this.chunks[name] = {x, z, heightmap, name};
+		this.chunks[name] = {x, z, name};
 	}
 
 	updateChunks(pos)
@@ -156,16 +171,16 @@ class Main extends NextGameGL {
 
 		this.updateChunks(pos);
 
-		if (this.cpos.heightmap) {
-			let hz = Math.floor(pos.z % 16);
-			let hx = Math.floor(pos.x % 16);
-			if (hz < 0) hz = hz + 15;
-			if (hx < 0) hx = hx + 15;
+		// if (this.cpos.heightmap) {
+		// 	let hz = Math.floor(pos.z % 16);
+		// 	let hx = Math.floor(pos.x % 16);
+		// 	if (hz < 0) hz = hz + 15;
+		// 	if (hx < 0) hx = hx + 15;
 
-			//console.log(hz, hx);
-			pos.y = this.cpos.heightmap[hz][hx] + 2;
-			//console.log(pos.y);
-		}
+		// 	//console.log(hz, hx);
+		// 	pos.y = this.cpos.heightmap[hz][hx] + 2;
+		// 	//console.log(pos.y);
+		// }
 
 		if (this.mouse.buttons) {
 			this.mouse.buttons = 0;
