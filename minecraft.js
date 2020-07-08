@@ -114,17 +114,12 @@ class Main extends NextGameGL {
 
 	addLights()
 	{
-		// create a point light
-		this.light = new THREE.PointLight(0xFFFFFF, 1, 20);
-		this.light.position.set(10, 50, 130);
-		this.scene.add(this.light);		
+		let ambientLight = new THREE.AmbientLight( 0x999999 );
+		this.scene.add( ambientLight );
 
-		// var dl = new THREE.DirectionalLight( 0xffffff, 1);
-		// dl.position.set(0,1,1);
-		// this.scene.add(dl);
-
-		const am = new THREE.AmbientLight( 0x404040 ); // soft white light
-		this.scene.add(am);
+		let directionalLight = new THREE.DirectionalLight( 0x999999, 2 );
+		directionalLight.position.set( 1, 1, 0.5 ).normalize();
+		this.scene.add( directionalLight );
 	}
 
 	update()
@@ -171,12 +166,6 @@ class Main extends NextGameGL {
 			pos.y = this.cpos.heightmap[hz][hx] + 2;
 			//console.log(pos.y);
 		}
-
-		this.light.position.set(
-			pos.x,
-			pos.y + 6,
-			pos.z + 2,
-		);
 
 		if (this.mouse.buttons) {
 			this.mouse.buttons = 0;
