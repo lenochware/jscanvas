@@ -49,6 +49,9 @@ class Main extends NextGameGL {
 		  that.canvas.requestPointerLock();
 		};
 
+		window.onresize = function() {
+			that.windowResize();
+		}
 	}
 
 	createScene()
@@ -155,6 +158,11 @@ class Main extends NextGameGL {
 	update()
 	{
 		this.requestUpdate();
+
+		if (!this.isPointerLock()) {
+			this.renderer.render( this.scene, this.camera );
+			return;
+		}
 
 		let pos = this.camera.position;
 
