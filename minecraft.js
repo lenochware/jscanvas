@@ -164,10 +164,12 @@ class Main extends NextGameGL {
 		if (this.cpos.heightmap) {
 			let hz = Math.floor(pos.z % 16);
 			let hx = Math.floor(pos.x % 16);
-			console.log(hz, hx);
-			pos.y = this.cpos.heightmap[hz][hx] + 2;
-			console.log(pos.y);
+			if (hz < 0) hz = hz + 15;
+			if (hx < 0) hx = hx + 15;
 
+			//console.log(hz, hx);
+			pos.y = this.cpos.heightmap[hz][hx] + 2;
+			//console.log(pos.y);
 		}
 
 		this.light.position.set(
