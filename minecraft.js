@@ -8,8 +8,6 @@ class Main extends NextGameGL {
 	{
 		super.init();
 
-		this.light = null;
-
 		this.cpos = {x:0, z:0};
 		this.chunks = {};
 		this.assets = {}
@@ -192,24 +190,15 @@ class Main extends NextGameGL {
 			pos.z += -Math.sin(this.camera.rotation.y) * .1;			
 		}
 
-		this.updateChunks(pos);
-
-		// if (this.cpos.heightmap) {
-		// 	let hz = Math.floor(pos.z % 16);
-		// 	let hx = Math.floor(pos.x % 16);
-		// 	if (hz < 0) hz = hz + 15;
-		// 	if (hx < 0) hx = hx + 15;
-
-		// 	//console.log(hz, hx);
-		// 	pos.y = this.cpos.heightmap[hz][hx] + 2;
-		// 	//console.log(pos.y);
-		// }
+		if (this.mouse.hold == this.MB_LEFT) pos.y += .1;
+		if (this.mouse.hold == this.MB_RIGHT) pos.y -= .1;
 
 		if (this.mouse.buttons) {
 			this.mouse.buttons = 0;
 		}
 
+		this.updateChunks(pos);
+
 		this.renderer.render( this.scene, this.camera );
-		this.time = this.now();
 	}
 }
