@@ -1,4 +1,4 @@
-const CHUNK_SIZE = 16;
+const CHUNK_SIZE = 22;
 const HEIGHT_MAX = 12;
 const HEIGHT_MIN = -4;
 
@@ -14,35 +14,11 @@ class Main extends NextGameGL {
 
 		const loader = new THREE.TextureLoader();
 
-		let grass = [
-			loader.load('images/grass-top.png'),
-			loader.load('images/grass-side.png'),
-			loader.load('images/dirt.png')
-		];
-
-		grass[0].magFilter = THREE.NearestFilter;
-		grass[1].magFilter = THREE.NearestFilter;
-		grass[2].magFilter = THREE.NearestFilter;
-
-		this.assets.grassMaterial = [
-       new THREE.MeshLambertMaterial({ map: grass[1] }),
-       new THREE.MeshLambertMaterial({ map: grass[1] }),
-       new THREE.MeshLambertMaterial({ map: grass[0] }),
-       new THREE.MeshLambertMaterial({ map: grass[1] }),
-       new THREE.MeshLambertMaterial({ map: grass[1] }),
-       new THREE.MeshLambertMaterial({ map: grass[2] })
-    ];
-
-		this.assets.boxGeometry = new THREE.BoxBufferGeometry(1,1,1);
 		this.assets.basicMaterial = new THREE.MeshLambertMaterial({color:'#3f3'});
 
 		let all = loader.load('images/all.png');
 		all.magFilter = THREE.NearestFilter;
 		this.assets.boxMaterial = new THREE.MeshLambertMaterial({ map: all });
-
-		//this.assets.basicMaterial = new THREE.MeshNormalMaterial();
-
-		//this.controls = new THREE.PointerLockControls();
 
 		this.createScene();
 		this.addLights();
@@ -60,6 +36,7 @@ class Main extends NextGameGL {
 	createScene()
 	{
 		this.scene.background = new THREE.Color( 0x8cc4fe );
+		this.scene.fog = new THREE.FogExp2(this.scene.background, 0.03);
 
 		this.camera.position.set(10, 4, 20);
 		this.camera.lookAt(10, 4, 0);
