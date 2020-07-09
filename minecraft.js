@@ -35,6 +35,11 @@ class Main extends NextGameGL {
 
 		this.assets.boxGeometry = new THREE.BoxBufferGeometry(1,1,1);
 		this.assets.basicMaterial = new THREE.MeshLambertMaterial({color:'#3f3'});
+
+		let all = loader.load('images/all.png');
+		all.magFilter = THREE.NearestFilter;
+		this.assets.boxMaterial = new THREE.MeshLambertMaterial({ map: all });
+
 		//this.assets.basicMaterial = new THREE.MeshNormalMaterial();
 
 		//this.controls = new THREE.PointerLockControls();
@@ -92,14 +97,29 @@ class Main extends NextGameGL {
 		return b;
 	}
 
+	addCBox(box, b, x, y, z, t)
+	{
+		box.matrix.makeTranslation(x, y, z);
+
+		if (b.px == 0) box.add(box.px);
+		if (b.nx == 0) box.add(box.nx);
+		if (b.py == 0) box.add(box.py);
+		if (b.ny == 0) box.add(box.ny);
+		if (b.pz == 0) box.add(box.pz);
+		if (b.nz == 0) box.add(box.nz);
+	}
+
 
 	addChunk(x, z)
 	{
 		let name = x+','+z;
 		if (this.chunks[name]) return;
 
-		let chunk = new THREE.Group();
-		chunk.name = name;
+		// let chunk = new THREE.Group();
+		// chunk.name = name;
+
+		let box = new CustomBoxGeometry(this.assets.boxMaterial);
+		box.name = name;
 
 		let cx = x*CHUNK_SIZE;
 		let cz = z*CHUNK_SIZE;
@@ -109,12 +129,14 @@ class Main extends NextGameGL {
 				for(let y = HEIGHT_MAX; y > HEIGHT_MIN; y--) {
 					let b = this.getBlocks(cx+j, y, cz+i);
 					if (b.id == 0 || b.hidden) continue;
-					this.addBox(chunk, cx+j, y, cz+i, b);
+
+					this.addCBox(box, b, cx+j, y, cz+i, b);
+					//this.addBox(chunk, cx+j, y, cz+i, b);
 				}
 			}
 		}
 
-		this.scene.add(chunk);
+		this.scene.add(box.mesh());
 		this.chunks[name] = {x, z, name};
 	}
 
@@ -200,5 +222,86 @@ class Main extends NextGameGL {
 		this.updateChunks(pos);
 
 		this.renderer.render( this.scene, this.camera );
+	}
+}
+
+class CustomBoxGeometry
+{
+	constructor(material)
+	{
+		this.i = 0;
+		this.name = '';
+		this.material = material;
+		this.matrix = new THREE.Matrix4();
+		this.geometry = new THREE.Geometry();
+
+		this.px = new THREE.PlaneGeometry(1, 1);
+	
+		this.px.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
+		this.px.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
+		this.px.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
+
+		this.px.rotateY( Math.PI / 2 );
+		this.px.translate( 0.5, 0, 0 );
+
+		this.nx = new THREE.PlaneGeometry(1, 1);
+
+		this.nx.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
+		this.nx.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
+		this.nx.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
+
+		this.nx.rotateY( - Math.PI / 2 );
+		this.nx.translate( -0.5, 0, 0 );
+
+		this.py = new THREE.PlaneGeometry(1, 1);
+		
+		this.py.faceVertexUvs[ 0 ][ 0 ][ 1 ].y = 0.5;
+		this.py.faceVertexUvs[ 0 ][ 1 ][ 0 ].y = 0.5;
+		this.py.faceVertexUvs[ 0 ][ 1 ][ 1 ].y = 0.5;
+
+		this.py.rotateX( - Math.PI / 2 );
+		this.py.translate( 0, 0.5, 0 );
+
+		this.ny = new THREE.PlaneGeometry(1, 1);
+
+		this.ny.faceVertexUvs[ 0 ][ 0 ][ 1 ].y = 0.5;
+		this.ny.faceVertexUvs[ 0 ][ 1 ][ 0 ].y = 0.5;
+		this.ny.faceVertexUvs[ 0 ][ 1 ][ 1 ].y = 0.5;
+		
+		this.ny.rotateX( - Math.PI / 2 );
+		this.ny.translate( 0, -0.5, 0 );
+
+		this.pz = new THREE.PlaneGeometry(1, 1);
+
+		this.pz.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
+		this.pz.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
+		this.pz.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
+
+		this.pz.translate( 0, 0, 0.5 );
+
+		this.nz = new THREE.PlaneGeometry(1, 1);
+
+		this.nz.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
+		this.nz.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
+		this.nz.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
+
+		this.nz.rotateY( Math.PI );
+		this.nz.translate( 0, 0, -0.5 );
+	}
+
+	add(g)
+	{
+		this.geometry.merge(g, this.matrix);
+	}
+
+	mesh()
+	{
+		let m = new THREE.Mesh(
+			new THREE.BufferGeometry().fromGeometry(this.geometry), 
+			this.material
+		);
+
+		m.name = this.name;
+		return m;
 	}
 }
