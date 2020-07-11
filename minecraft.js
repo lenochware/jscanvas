@@ -63,13 +63,6 @@ class Main extends NextGameGL {
 		this.camera.rotation.order = "YXZ"; 
 	}
 
-	addBox(group, x, y, z, t)
-	{
-		let m = new THREE.Mesh(this.assets.boxGeometry, this.assets.grassMaterial);
-		m.position.set(x, y, z);
-		group.add(m);
-	}
-
 	getBlock(x, y, z)
 	{
 		if (y < HEIGHT_MIN) return 1;
@@ -94,46 +87,22 @@ class Main extends NextGameGL {
 		return b;
 	}
 
-	addCBox(box, b, x, y, z, t)
-	{
-		box.matrix.makeTranslation(x, y, z);
-
-		if (b.px == 0) box.add(box.px);
-		if (b.nx == 0) box.add(box.nx);
-		if (b.py == 0) box.add(box.py);
-		if (b.ny == 0) box.add(box.ny);
-		if (b.pz == 0) box.add(box.pz);
-		if (b.nz == 0) box.add(box.nz);
-	}
-
-
 	addChunk(x, z)
 	{
 		let name = x+','+z;
 		if (this.chunks[name]) return;
 
-		// let chunk = new THREE.Group();
-		// chunk.name = name;
+		let chunk = new Chunk(this, x, z);
 
-		let box = new CustomBoxGeometry(this.assets.boxMaterial);
-		box.name = name;
+		let m = new THREE.Mesh(
+			new THREE.BufferGeometry().fromGeometry(chunk.createGeometry()), 
+			this.assets.boxMaterial
+		);
 
-		let cx = x*CHUNK_SIZE;
-		let cz = z*CHUNK_SIZE;
+		m.name = name;
 
-		for(let i = 0; i < CHUNK_SIZE; i++) {
-			for(let j = 0; j < CHUNK_SIZE; j++) {
-				for(let y = HEIGHT_MAX; y > HEIGHT_MIN; y--) {
-					let b = this.getBlocks(cx+j, y, cz+i);
-					if (b.id == 0 || b.hidden) continue;
+		this.scene.add(m);
 
-					this.addCBox(box, b, cx+j, y, cz+i, b);
-					//this.addBox(chunk, cx+j, y, cz+i, b);
-				}
-			}
-		}
-
-		this.scene.add(box.mesh());
 		this.chunks[name] = {x, z, name};
 	}
 
@@ -222,83 +191,85 @@ class Main extends NextGameGL {
 	}
 }
 
-class CustomBoxGeometry
+class Chunk
 {
-	constructor(material)
+	constructor(game, x, z)
 	{
-		this.i = 0;
-		this.name = '';
-		this.material = material;
+		this.game = game;
 		this.matrix = new THREE.Matrix4();
 		this.geometry = new THREE.Geometry();
-
-		this.px = new THREE.PlaneGeometry(1, 1);
-	
-		this.px.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
-		this.px.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
-		this.px.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
-
-		this.px.rotateY( Math.PI / 2 );
-		this.px.translate( 0.5, 0, 0 );
-
-		this.nx = new THREE.PlaneGeometry(1, 1);
-
-		this.nx.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
-		this.nx.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
-		this.nx.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
-
-		this.nx.rotateY( - Math.PI / 2 );
-		this.nx.translate( -0.5, 0, 0 );
-
-		this.py = new THREE.PlaneGeometry(1, 1);
-		
-		this.py.faceVertexUvs[ 0 ][ 0 ][ 1 ].y = 0.5;
-		this.py.faceVertexUvs[ 0 ][ 1 ][ 0 ].y = 0.5;
-		this.py.faceVertexUvs[ 0 ][ 1 ][ 1 ].y = 0.5;
-
-		this.py.rotateX( - Math.PI / 2 );
-		this.py.translate( 0, 0.5, 0 );
-
-		this.ny = new THREE.PlaneGeometry(1, 1);
-
-		this.ny.faceVertexUvs[ 0 ][ 0 ][ 1 ].y = 0.5;
-		this.ny.faceVertexUvs[ 0 ][ 1 ][ 0 ].y = 0.5;
-		this.ny.faceVertexUvs[ 0 ][ 1 ][ 1 ].y = 0.5;
-		
-		this.ny.rotateX( - Math.PI / 2 );
-		this.ny.translate( 0, -0.5, 0 );
-
-		this.pz = new THREE.PlaneGeometry(1, 1);
-
-		this.pz.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
-		this.pz.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
-		this.pz.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
-
-		this.pz.translate( 0, 0, 0.5 );
-
-		this.nz = new THREE.PlaneGeometry(1, 1);
-
-		this.nz.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
-		this.nz.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
-		this.nz.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
-
-		this.nz.rotateY( Math.PI );
-		this.nz.translate( 0, 0, -0.5 );
+		this.box = this.createBox();
+		this.x = x;
+		this.z = z;
 	}
 
-	add(g)
+	createBox()
 	{
-		this.geometry.merge(g, this.matrix);
+		let box = {};
+
+		box.px = new THREE.PlaneGeometry(1, 1);
+		box.px.rotateY( Math.PI / 2 );
+		box.px.translate( 0.5, 0, 0 );
+
+		box.nx = new THREE.PlaneGeometry(1, 1);
+		box.nx.rotateY( - Math.PI / 2 );
+		box.nx.translate( -0.5, 0, 0 );
+
+		box.py = new THREE.PlaneGeometry(1, 1);
+		box.py.rotateX( - Math.PI / 2 );
+		box.py.translate( 0, 0.5, 0 );
+
+		box.ny = new THREE.PlaneGeometry(1, 1);
+		box.ny.rotateX( - Math.PI / 2 );
+		box.ny.translate( 0, -0.5, 0 );
+
+		box.pz = new THREE.PlaneGeometry(1, 1);
+		box.pz.translate( 0, 0, 0.5 );
+
+		box.nz = new THREE.PlaneGeometry(1, 1);
+		box.nz.rotateY( Math.PI );
+		box.nz.translate( 0, 0, -0.5 );		
+
+		return box;
 	}
 
-	mesh()
+	createGeometry()
 	{
-		let m = new THREE.Mesh(
-			new THREE.BufferGeometry().fromGeometry(this.geometry), 
-			this.material
-		);
+		let cx = this.x * CHUNK_SIZE;
+		let cz = this.z * CHUNK_SIZE;
 
-		m.name = this.name;
-		return m;
+		for(let i = 0; i < CHUNK_SIZE; i++) {
+			for(let j = 0; j < CHUNK_SIZE; j++) {
+				for(let y = HEIGHT_MAX; y > HEIGHT_MIN; y--) {
+					let b = this.game.getBlocks(cx+j, y, cz+i);
+					if (b.id == 0 || b.hidden) continue;
+					this.addBox(b, cx+j, y, cz+i);
+				}
+			}
+		}
+
+		return this.geometry;
 	}
+
+	addPlane(p, texture)
+	{
+		p.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
+		p.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
+		p.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
+
+		this.geometry.merge(p, this.matrix);
+	}
+
+	addBox(b, x, y, z)
+	{
+		this.matrix.makeTranslation(x, y, z);
+
+		if (b.px == 0) this.addPlane(this.box.px, 0);
+		if (b.nx == 0) this.addPlane(this.box.nx, 0);
+		if (b.py == 0) this.addPlane(this.box.py, 0);
+		if (b.ny == 0) this.addPlane(this.box.ny, 0);
+		if (b.pz == 0) this.addPlane(this.box.pz, 0);
+		if (b.nz == 0) this.addPlane(this.box.nz, 0);
+	}
+
 }
