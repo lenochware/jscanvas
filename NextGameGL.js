@@ -6,12 +6,11 @@ class NextGameGL {
 		this.camera = null;
 		this.renderer = null;
 		this.canvas = null;
+		this.assets = {};
 
 		this.mouse = null;
 		this.kb = { key: ''};
 		this.kbmap = {};
-		this.elapsedTime = 0;
-		this.time = this.now();
 
 		this.MB_LEFT = 1;
 		this.MB_RIGHT = 2;
@@ -20,7 +19,47 @@ class NextGameGL {
 
 	start()
 	{
-		this.init();
+		this.preload();
+		if (Utils.isEmpty(this.assets)) this.init();
+		this.loadAssets(() => this.init());
+	}
+
+	preload()
+	{
+	}
+
+	loadImage(id, url)
+	{
+		this.assets[id] = {id, url, type: 'image'};
+	}
+
+	loadText(id, url)
+	{
+		this.assets[id] = {id, url, type: 'text'};
+	}
+
+	loadAssets(callback)
+	{
+		let assetKeys = Object.keys(this.assets);
+	  let count = assetKeys.length;
+	  let onload = function() { if (--count == 0) callback(); };
+
+	  for(let key of assetKeys) {
+	  	let a = this.assets[key];
+	  	switch (a.type) {
+	  		case 'image':
+ 			    a.data = new Image();
+			    a.data.addEventListener('load', onload);
+			    a.data.src = this.assets[key].url;
+			    break;
+			  case 'text':
+			  	fetch(a.url).then(response => response.text())
+			  		.then(text => a.data = text)
+			  		.then(onload);
+			  break;
+			  default : throw Error('Unknown asset type');
+	  	}
+	  }
 	}
 
 	init()
@@ -177,7 +216,6 @@ class NextGameGL {
 
 	update()
 	{
-		this.time = this.now();
 	}
 
 }
