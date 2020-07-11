@@ -199,6 +199,7 @@ class Chunk
 		this.matrix = new THREE.Matrix4();
 		this.geometry = new THREE.Geometry();
 		this.box = this.createBox();
+		this.uvs = this.getUvs();
 		this.x = x;
 		this.z = z;
 	}
@@ -233,6 +234,14 @@ class Chunk
 		return box;
 	}
 
+	getUvs()
+	{
+		return [
+			[],
+			[1,1,0,1,1,1]
+		];
+	}
+
 	createGeometry()
 	{
 		let cx = this.x * CHUNK_SIZE;
@@ -251,11 +260,18 @@ class Chunk
 		return this.geometry;
 	}
 
-	addPlane(p, texture)
+	addPlane(p, tex)
 	{
-		p.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 0.5;
-		p.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 0.5;
-		p.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 0.5;
+		let h = 0.125;
+
+		// 0, face, vertex
+		p.faceVertexUvs[ 0 ][ 0 ][ 1 ].y = 1 - (h + h * tex);
+		p.faceVertexUvs[ 0 ][ 1 ][ 0 ].y = 1 - (h + h * tex);
+		p.faceVertexUvs[ 0 ][ 1 ][ 1 ].y = 1 - (h + h * tex);
+
+		p.faceVertexUvs[ 0 ][ 0 ][ 0 ].y = 1 - h * tex;
+		p.faceVertexUvs[ 0 ][ 0 ][ 2 ].y = 1 - h * tex;
+		p.faceVertexUvs[ 0 ][ 1 ][ 2 ].y = 1 - h * tex;
 
 		this.geometry.merge(p, this.matrix);
 	}
@@ -264,12 +280,14 @@ class Chunk
 	{
 		this.matrix.makeTranslation(x, y, z);
 
-		if (b.px == 0) this.addPlane(this.box.px, 0);
-		if (b.nx == 0) this.addPlane(this.box.nx, 0);
-		if (b.py == 0) this.addPlane(this.box.py, 0);
-		if (b.ny == 0) this.addPlane(this.box.ny, 0);
-		if (b.pz == 0) this.addPlane(this.box.pz, 0);
-		if (b.nz == 0) this.addPlane(this.box.nz, 0);
+		let uv = this.uvs[b.id];
+
+		if (b.nx == 0) this.addPlane(this.box.nx, uv[0]);
+		if (b.px == 0) this.addPlane(this.box.px, uv[1]);
+		if (b.py == 0) this.addPlane(this.box.py, uv[2]);
+		if (b.ny == 0) this.addPlane(this.box.ny, uv[3]);
+		if (b.pz == 0) this.addPlane(this.box.pz, uv[4]);
+		if (b.nz == 0) this.addPlane(this.box.nz, uv[5]);
 	}
 
 }
