@@ -194,6 +194,18 @@ class NextGameGL {
 		}
 	}
 
+	fullScreen()
+	{
+		let that = this;
+		this.canvas.onclick = function() {
+		  that.canvas.requestPointerLock();
+		};
+
+		window.onresize = function() {
+			that.windowResize();
+		}
+	}
+
 	isPointerLock()
 	{
 		return (document.pointerLockElement === this.canvas);

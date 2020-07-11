@@ -13,6 +13,7 @@ class Main extends NextGameGL {
 	init()
 	{
 		super.init();
+		this.fullScreen();
 
 		this.cpos = {x:0, z:0};
 		this.chunks = {};
@@ -27,15 +28,6 @@ class Main extends NextGameGL {
 
 		this.createScene();
 		this.addLights();
-
-		let that = this;
-		this.canvas.onclick = function() {
-		  that.canvas.requestPointerLock();
-		};
-
-		window.onresize = function() {
-			that.windowResize();
-		}
 	}
 
 	addSky()
