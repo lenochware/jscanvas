@@ -1,8 +1,14 @@
-const CHUNK_SIZE = 22;
+const CHUNK_SIZE = 20;
 const HEIGHT_MAX = 12;
 const HEIGHT_MIN = -4;
 
 class Main extends NextGameGL {
+	
+	preload()
+	{
+		this.loadText('vertexShader', 'shaders/sky.vert');
+		this.loadText('fragmentShader', 'shaders/sky.frag');
+	}
 
 	init()
 	{
@@ -10,7 +16,6 @@ class Main extends NextGameGL {
 
 		this.cpos = {x:0, z:0};
 		this.chunks = {};
-		this.assets = {}
 
 		const loader = new THREE.TextureLoader();
 
@@ -33,10 +38,33 @@ class Main extends NextGameGL {
 		}
 	}
 
+	addSky()
+	{
+		let uniforms = {
+			"topColor": { value: new THREE.Color( 0x0077ff ) },
+			"bottomColor": { value: new THREE.Color( 0xe0e0ff ) },
+			"offset": { value: 33 },
+			"exponent": { value: 0.6 }
+		};
+
+		let skyGeo = new THREE.SphereBufferGeometry( 800, 32, 15 );
+		//let skyMat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.BackSide} );
+		let skyMat = new THREE.ShaderMaterial( {
+			uniforms: uniforms,
+			vertexShader: this.assets.vertexShader['data'],
+			fragmentShader: this.assets.fragmentShader['data'],
+			side: THREE.BackSide
+		} );
+
+		let sky = new THREE.Mesh( skyGeo, skyMat );
+		this.scene.add( sky );		
+	}
+
 	createScene()
 	{
 		this.scene.background = new THREE.Color( 0x8cc4fe );
-		this.scene.fog = new THREE.FogExp2(this.scene.background, 0.03);
+		//this.scene.fog = new THREE.FogExp2(this.scene.background, 0.03);
+		this.addSky();
 
 		this.camera.position.set(10, 4, 20);
 		this.camera.lookAt(10, 4, 0);
