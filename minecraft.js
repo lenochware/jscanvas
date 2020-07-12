@@ -49,7 +49,7 @@ class Main extends NextGameGL {
 		} );
 
 		let sky = new THREE.Mesh( skyGeo, skyMat );
-		this.scene.add( sky );		
+		this.scene.add( sky );
 	}
 
 	createScene()
@@ -67,6 +67,10 @@ class Main extends NextGameGL {
 	{
 		if (y < HEIGHT_MIN) return 1;
 		let h = Math.floor(Utils.perlin.noise(x/10, z/10) * (HEIGHT_MAX - HEIGHT_MIN)) + HEIGHT_MIN;
+
+		if (y < h && y > 3 && y < 8) return 2;
+		if (y <= h && y < 0) return 3;
+
 		return (y > h)? 0 : 1;
 	}
 
@@ -139,6 +143,15 @@ class Main extends NextGameGL {
 		let directionalLight = new THREE.DirectionalLight( 0x999999, 2 );
 		directionalLight.position.set( 1, 1, 0.5 ).normalize();
 		this.scene.add( directionalLight );
+
+		let sun = new THREE.PlaneGeometry(50, 50);
+		sun.translate(0, 200, -400);
+		sun.rotateY( - Math.PI / 2 );
+
+		this.scene.add(
+			 new THREE.Mesh(sun, new THREE.MeshBasicMaterial( {color: 0xffff00} ))
+		);
+
 	}
 
 	update()
@@ -238,7 +251,9 @@ class Chunk
 	{
 		return [
 			[],
-			[1,1,0,1,1,1]
+			[1,1,0,1,1,1],
+			[2,2,2,2,2,2],
+			[3,3,3,3,3,3]
 		];
 	}
 
