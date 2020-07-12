@@ -1,4 +1,4 @@
-const CHUNK_SIZE = 20;
+const CHUNK_SIZE = 16;
 const HEIGHT_MAX = 12;
 const HEIGHT_MIN = -4;
 
@@ -94,7 +94,7 @@ class Main extends NextGameGL {
 	addChunk(x, z)
 	{
 		let name = x+','+z;
-		if (this.chunks[name]) return;
+		if (this.chunks[name]) return false;
 
 		let chunk = new Chunk(this, x, z);
 
@@ -108,6 +108,7 @@ class Main extends NextGameGL {
 		this.scene.add(m);
 
 		this.chunks[name] = {x, z, name};
+		return true;
 	}
 
 	updateChunks(pos)
@@ -118,17 +119,18 @@ class Main extends NextGameGL {
 		if (this.cpos.x == cx && this.cpos.z == cz) return;
 
 		for (let c of Object.values(this.chunks)) {
-			if (Math.abs(c.x - cx) < 2 && Math.abs(c.z - cz) < 2) continue;
+			if (Math.abs(c.x - cx) < 3 && Math.abs(c.z - cz) < 3) continue;
 			
 			//remove chunk
 			let chunk = this.scene.getObjectByName(c.name);
 			this.scene.remove(chunk);
 			delete this.chunks[c.name];
+			return;
 		}
 
-		for (let i = -1; i <= 1; i++) {
-			for (let j = -1; j <= 1; j++) {
-				this.addChunk(cx + i, cz + j);
+		for (let i = -2; i <= 2; i++) {
+			for (let j = -2; j <= 2; j++) {
+				if (this.addChunk(cx + i, cz + j)) return;
 			}
 		}
 
