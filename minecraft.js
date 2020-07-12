@@ -65,10 +65,16 @@ class Main extends NextGameGL {
 
 	getBlock(x, y, z)
 	{
-		if (y < HEIGHT_MIN) return 1;
+		if (y < HEIGHT_MIN) return 2;
 
 		let h1 = Utils.perlin.noise(x/30, z/30);
 		let h2 = Utils.perlin.noise(x/10 + 100, z/10 + 100);
+
+
+		if (x > 0 && x < 5) {
+			let cave = Utils.perlin.noise(x/10 + 255, y/10 + 255, z/10 + 255);
+			if (cave > 0.5) return 0;
+		}
 
 		let h = Math.floor((h1 + h2) * (HEIGHT_MAX - HEIGHT_MIN) / 2) + HEIGHT_MIN;
 		//let h = Math.floor(Utils.perlin.noise(x/10, z/10) * (HEIGHT_MAX - HEIGHT_MIN)) + HEIGHT_MIN;
@@ -241,7 +247,7 @@ class Chunk
 		box.py.translate( 0, 0.5, 0 );
 
 		box.ny = new THREE.PlaneGeometry(1, 1);
-		box.ny.rotateX( - Math.PI / 2 );
+		box.ny.rotateX( Math.PI / 2 );
 		box.ny.translate( 0, -0.5, 0 );
 
 		box.pz = new THREE.PlaneGeometry(1, 1);
@@ -258,7 +264,7 @@ class Chunk
 	{
 		return [
 			[],
-			[1,1,0,1,1,1],
+			[1,1,0,2,1,1],
 			[2,2,2,2,2,2],
 			[3,3,3,3,3,3]
 		];
@@ -271,7 +277,7 @@ class Chunk
 
 		for(let i = 0; i < CHUNK_SIZE; i++) {
 			for(let j = 0; j < CHUNK_SIZE; j++) {
-				for(let y = HEIGHT_MAX; y > HEIGHT_MIN; y--) {
+				for(let y = HEIGHT_MAX; y > HEIGHT_MIN - 2; y--) {
 					let b = this.game.getBlocks(cx+j, y, cz+i);
 					if (b.id == 0 || b.hidden) continue;
 					this.addBox(b, cx+j, y, cz+i);
