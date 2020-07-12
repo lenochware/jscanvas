@@ -1,6 +1,6 @@
 const CHUNK_SIZE = 16;
-const HEIGHT_MAX = 12;
-const HEIGHT_MIN = -4;
+const HEIGHT_MAX = 20;
+const HEIGHT_MIN = -10;
 
 class Main extends NextGameGL {
 	
@@ -66,7 +66,12 @@ class Main extends NextGameGL {
 	getBlock(x, y, z)
 	{
 		if (y < HEIGHT_MIN) return 1;
-		let h = Math.floor(Utils.perlin.noise(x/10, z/10) * (HEIGHT_MAX - HEIGHT_MIN)) + HEIGHT_MIN;
+
+		let h1 = Utils.perlin.noise(x/30, z/30);
+		let h2 = Utils.perlin.noise(x/10 + 100, z/10 + 100);
+
+		let h = Math.floor((h1 + h2) * (HEIGHT_MAX - HEIGHT_MIN) / 2) + HEIGHT_MIN;
+		//let h = Math.floor(Utils.perlin.noise(x/10, z/10) * (HEIGHT_MAX - HEIGHT_MIN)) + HEIGHT_MIN;
 
 		if (y < h && y > 3 && y < 8) return 2;
 		if (y <= h && y < 0) return 3;
