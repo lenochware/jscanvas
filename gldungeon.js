@@ -5,9 +5,10 @@ class Main extends NextGameGL {
 	init()
 	{
 		super.init();
+		this.fullScreen();
 
 		// (left, up, forward)
-		this.camera.position.set(0, 0.5, -2);
+		this.camera.position.set(0, 0.5, -5);
 		this.camera.lookAt(0, 0.5, 0);
 		this.camera.rotation.order = "YXZ"; 		
 
@@ -24,6 +25,8 @@ class Main extends NextGameGL {
 		wall.material = new THREE.MeshLambertMaterial( { map: wall.texture, color: '#FFFFFF' } );
 
 		this.objects.wall = wall;
+
+		this.player = new Player(this);
 
 		this.createScene();
 		this.addLights();
@@ -60,25 +63,35 @@ class Main extends NextGameGL {
 	{
 		this.requestUpdate();
 
-		if (this.kbmap['ArrowUp']) {
-			this.camera.position.z -= 0.1;
-		}
+		this.debugText(this.camera.rotation);
 
-		if (this.kbmap['ArrowDown']) {
-			this.camera.position.z += 0.1;
-		}
 
-		if (this.kbmap['ArrowLeft']) {
-			this.camera.position.x -= 0.1;
-		}
+		if (!this.isPointerLock()) {
+			this.renderer.render( this.scene, this.camera );
+			return;
+		}		
 
-		if (this.kbmap['ArrowRight']) {
-			this.camera.position.x += 0.1;
-		}
+		this.playerMove();
 
-		if (this.mouse.buttons) {
-			this.mouse.buttons = 0;
-		}
+		// if (this.kbmap['ArrowUp']) {
+		// 	this.camera.position.z -= 0.1;
+		// }
+
+		// if (this.kbmap['ArrowDown']) {
+		// 	this.camera.position.z += 0.1;
+		// }
+
+		// if (this.kbmap['ArrowLeft']) {
+		// 	this.camera.position.x -= 0.1;
+		// }
+
+		// if (this.kbmap['ArrowRight']) {
+		// 	this.camera.position.x += 0.1;
+		// }
+
+		// if (this.mouse.buttons) {
+		// 	this.mouse.buttons = 0;
+		// }
 
 		// this.camera.rotation.x = this.mouse.y / 400 - 1;
 		// this.camera.rotation.y = this.mouse.x / 800 - 1;
@@ -93,4 +106,49 @@ class Main extends NextGameGL {
 
 		this.time = this.now();
 	}
+
+	playerMove()
+	{
+		let pos = this.camera.position;
+
+		this.camera.rotation.x = -(this.mouse.vy*.5 / window.innerHeight - 0.5) * Utils.TWO_PI;
+		this.camera.rotation.y = -(this.mouse.vx*.5 / window.innerWidth - 0.5) * Utils.TWO_PI;
+
+		this.camera.rotation.x = Utils.clamp(this.camera.rotation.x, -1.5, 1.5);
+
+		if (this.kbmap['ArrowUp']) {
+			pos.x -= Math.sin(this.camera.rotation.y) * .05;
+			pos.z -= Math.cos(this.camera.rotation.y) * .05;	
+		}
+
+		if (this.kbmap['ArrowDown']) {
+			pos.x += Math.sin(this.camera.rotation.y) * .05;
+			pos.z += Math.cos(this.camera.rotation.y) * .05;
+		}
+
+
+		if (this.kbmap['ArrowLeft']) {
+			pos.x -= Math.cos(this.camera.rotation.y) * .05;
+			pos.z -= -Math.sin(this.camera.rotation.y) * .05;			
+		}
+
+		if (this.kbmap['ArrowRight']) {
+			pos.x += Math.cos(this.camera.rotation.y) * .05;
+			pos.z += -Math.sin(this.camera.rotation.y) * .05;			
+		}
+	}
+
+}
+
+class Player
+{
+	constructor(game)
+	{
+		this.game = game;
+		this.camera = this.game.camera;
+
+		this.x = 0;
+		this.y = 0;
+		this.rotateY = 0;
+	}	
 }
