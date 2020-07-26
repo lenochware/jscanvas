@@ -143,7 +143,8 @@ class NextGameGL {
 	{
 		this.mouse = {
 			x: 0, y: 0,
-			vx: 0, vy: 0, 
+			vx: 0, vy: 0,
+			mx: 0, my: 0,
 			buttons: 0, 
 			deltaY: 0, 
 			clickX: 0, clickY: 0, 
@@ -178,9 +179,12 @@ class NextGameGL {
     let scaleY = this.canvas.height / window.innerHeight;
     let m = this.mouse;
 
+    m.mx = e.originalEvent.movementX;
+    m.my = e.originalEvent.movementY;
+
     //pointer lock
-    m.vx += e.originalEvent.movementX;
-    m.vy += e.originalEvent.movementY;
+    m.vx += m.mx;
+    m.vy += m.my;
 		
 		m.x = Math.floor(e.offsetX * scaleX);
 		m.y = Math.floor(e.offsetY * scaleY);
@@ -193,6 +197,8 @@ class NextGameGL {
 			m.offsetX = m.offsetY = 0;
 		}
 	}
+
+
 
 	fullScreen()
 	{
