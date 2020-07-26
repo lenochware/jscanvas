@@ -7,6 +7,8 @@ class Main extends NextGameGL {
 		super.init();
 		this.fullScreen();
 
+		this.startMouse = null;
+
 		// (left, up, forward)
 		this.camera.position.set(0, 0.5, -5);
 		this.camera.lookAt(0, 0.5, 0);
@@ -64,12 +66,19 @@ class Main extends NextGameGL {
 		this.requestUpdate();
 
 		this.debugText(this.camera.rotation);
+		//this.debugText(this.camera.rotation);
 
 
 		if (!this.isPointerLock()) {
 			this.renderer.render( this.scene, this.camera );
 			return;
-		}		
+		}
+
+		if (!this.startMouse) {
+			this.startMouse = {x: this.mouse.vx, y: this.mouse.vy};
+		}
+
+
 
 		this.playerMove();
 
@@ -111,8 +120,8 @@ class Main extends NextGameGL {
 	{
 		let pos = this.camera.position;
 
-		this.camera.rotation.x = -(this.mouse.vy*.5 / window.innerHeight - 0.5) * Utils.TWO_PI;
-		this.camera.rotation.y = -(this.mouse.vx*.5 / window.innerWidth - 0.5) * Utils.TWO_PI;
+		this.camera.rotation.x = -((this.mouse.vy - this.startMouse.y) / window.innerHeight - 0.5) * Utils.TWO_PI - Math.PI;
+		this.camera.rotation.y = -((this.mouse.vx - this.startMouse.x) / window.innerWidth - 0.5) * Utils.TWO_PI;
 
 		this.camera.rotation.x = Utils.clamp(this.camera.rotation.x, -1.5, 1.5);
 

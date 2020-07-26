@@ -230,10 +230,21 @@ class NextGameGL {
 	{
 	}
 
-	debugText(val)
+	debugText()
 	{
-		if (typeof val === 'object') val = JSON.stringify(val);
-		$('#debug-box').html(val);
+		let s = '';
+		for (let arg of arguments) {
+			if (arg === null) {
+				s += 'null';
+				continue;
+			}
+
+			if (typeof arg === 'object') s += JSON.stringify(arg);
+			else s += arg;
+			s += ' ';
+  	}
+		
+		$('#debug-box').html(s);
 	}
 
 }
