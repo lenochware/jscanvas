@@ -10,10 +10,9 @@ class Main extends NextGameGL {
 		this.raycaster = new THREE.Raycaster();
 		this.selected = 0;
 
+		//this.setOrtho(20, 10);
+
 		// (left, up, backward)
-		// let width = 20;
-		// let height = 20;
-		// this.camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2);
 		this.camera.position.set(0, 4, 10);
 		this.camera.lookAt(0, 0, 0);
 		this.camera.rotation.order = "YXZ";
@@ -21,6 +20,7 @@ class Main extends NextGameGL {
 		const textureLoader = new THREE.TextureLoader();
 		this.texture = textureLoader.load( 'images/dg_features32.gif' );
 		this.texture.magFilter = THREE.NearestFilter;
+		this.texture.minFilter = THREE.NearestFilter;
 		//this.texture.anisotropy = 16;
 
 		this.box = this.createBox();
@@ -130,6 +130,18 @@ class Main extends NextGameGL {
 		if (this.kbmap['-']) {
 			this.scene.position.z -= 0.05;
 		}
+
+		// key '/' repeats ad infimum?
+		if (this.kbmap['z']) {
+			this.camera.zoom += 0.05;
+			this.camera.updateProjectionMatrix();
+		}
+
+		if (this.kbmap['Z']/* && this.kbmap['Shift']*/) {
+			this.camera.zoom -= 0.05;
+			this.camera.updateProjectionMatrix();
+		}
+
 
 		if (this.mouse.buttons == this.MB_LEFT)
 		{

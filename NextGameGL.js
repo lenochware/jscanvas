@@ -76,6 +76,11 @@ class NextGameGL {
 		this.requestUpdate();
 	}
 
+	setOrtho(width, height)
+	{
+		this.camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2);		
+	}
+
 	now()
 	{
 		return Date.now();
@@ -129,7 +134,7 @@ class NextGameGL {
 	{
 		$("body").on('keydown', (e) => {
 			this.kb = e;
-			this.kbmap[e.keyCode] = true;
+			//this.kbmap[e.keyCode] = true;
 		});
 
 
