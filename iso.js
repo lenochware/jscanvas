@@ -6,7 +6,7 @@ class Main extends NextGameGL {
 		//this.fullScreen();
 
 		this.raycaster = new THREE.Raycaster();
-    this.selected = null;
+		this.selected = null;
 
 		// (left, up, backward)
 		// let width = 20;
@@ -47,7 +47,7 @@ class Main extends NextGameGL {
 	 //  // front
 	 //  [ new THREE.Vector2(u, v), new THREE.Vector2(u + 1/w, v + 1/h), new THREE.Vector2(u, v + 1/h) ],
 	 //  [ new THREE.Vector2(u, v), new THREE.Vector2(u + 1/w, v), new THREE.Vector2(u + 1/w, v + 1/h) ],
-  // );
+	// );
 
 	}
 
@@ -82,8 +82,6 @@ class Main extends NextGameGL {
 	{
 		this.requestUpdate();
 			
-			//this.debugText(mousePos);
-
 		// if (!this.isPointerLock()) {
 		// 	this.renderer.render( this.scene, this.camera );
 		// 	return;
@@ -130,28 +128,28 @@ class Main extends NextGameGL {
 			y: this.mouse.y / this.canvas.height * -2 + 1
 		};
 
-  	this.raycaster.setFromCamera(mousePos, this.camera);
-  	// get the list of objects the ray intersected
-  	const intersectedObjects = this.raycaster.intersectObjects(this.scene.children);
-  	if (intersectedObjects.length) {
-    	return intersectedObjects[0].object;
-    }
-    else return null;
+		this.raycaster.setFromCamera(mousePos, this.camera);
+		// get the list of objects the ray intersected
+		const intersectedObjects = this.raycaster.intersectObjects(this.scene.children);
+		if (intersectedObjects.length) {
+			return intersectedObjects[0].object;
+		}
+		else return null;
 	}
 
 	createPlane()
 	{
 		const geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(-.5, -.5,  0),
-      new THREE.Vector3( .5, -.5,  0),
-      new THREE.Vector3(-.5,  .5,  0),
-      new THREE.Vector3( .5,  .5,  0)
-    );
+		geometry.vertices.push(
+			new THREE.Vector3(-.5, -.5,  0),
+			new THREE.Vector3( .5, -.5,  0),
+			new THREE.Vector3(-.5,  .5,  0),
+			new THREE.Vector3( .5,  .5,  0)
+		);
 
-    geometry.faces.push(
-		  new THREE.Face3(0, 3, 2),
-		  new THREE.Face3(0, 1, 3)
+		geometry.faces.push(
+			new THREE.Face3(0, 3, 2),
+			new THREE.Face3(0, 1, 3)
 		);
 
 		// geometry.faces[0].color =  new THREE.Color('red');
@@ -164,9 +162,9 @@ class Main extends NextGameGL {
 	 //  ];
 
 		geometry.faceVertexUvs[0].push(
-		  [ new THREE.Vector2(0, 0), new THREE.Vector2(0, 0), new THREE.Vector2(0, 0) ],
-		  [ new THREE.Vector2(0, 0), new THREE.Vector2(0, 0), new THREE.Vector2(0, 0) ],
-	  );
+			[ new THREE.Vector2(0, 0), new THREE.Vector2(0, 0), new THREE.Vector2(0, 0) ],
+			[ new THREE.Vector2(0, 0), new THREE.Vector2(0, 0), new THREE.Vector2(0, 0) ],
+		);
 	 
 		return geometry;
 }
