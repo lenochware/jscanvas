@@ -3,9 +3,10 @@ class Main extends NextGameGL {
 	init()
 	{
 		super.init();
-		this.fullScreen();
+		//this.fullScreen();
 
-		this.light = null;
+		this.raycaster = new THREE.Raycaster();
+    this.selected = null;
 
 		// (left, up, backward)
 		// let width = 20;
@@ -40,6 +41,8 @@ class Main extends NextGameGL {
 		 face[1][1].set(u + 1/w, v);
 		 face[1][2].set(u + 1/w, v + 1/h);
 
+		 m.geometry.uvsNeedUpdate = true;
+
 	 // geometry.faceVertexUvs[0].push(
 	 //  // front
 	 //  [ new THREE.Vector2(u, v), new THREE.Vector2(u + 1/w, v + 1/h), new THREE.Vector2(u, v + 1/h) ],
@@ -61,6 +64,7 @@ class Main extends NextGameGL {
 			for(let x = 0; x < 10; x++) {
 				let m = new THREE.Mesh(box.py.clone(), mat1);
 				m.position.set(x - 5, 0, y - 5);
+				m.name = x + ',' + y;
 				if (x == y) this.setTexture(m, 8); else this.setTexture(m, 18);
 				this.scene.add(m);
 			}
@@ -69,16 +73,6 @@ class Main extends NextGameGL {
 
 	addLights()
 	{
-		// // create a point light
-		// this.light = new THREE.PointLight(0xFFFFFF, 1);
-
-		// // set its position
-		// this.light.position.x = 10;
-		// this.light.position.y = 50;
-		// this.light.position.z = 130;
-
-		// this.scene.add(this.light);		
-
 		//const am = new THREE.AmbientLight( 0x404040 ); // soft white light
 		const am = new THREE.AmbientLight( 0xffffff ); // soft white light
 		this.scene.add(am);
@@ -87,26 +81,39 @@ class Main extends NextGameGL {
 	update()
 	{
 		this.requestUpdate();
+			
+			//this.debugText(mousePos);
 
-		this.debugText(this.mouse.mx);
-
-		if (!this.isPointerLock()) {
-			this.renderer.render( this.scene, this.camera );
-			return;
-		}		
+		// if (!this.isPointerLock()) {
+		// 	this.renderer.render( this.scene, this.camera );
+		// 	return;
+		// }		
 
 		if (this.kbmap['ArrowUp']) {
-			this.camera.position.z -= 0.1;
+			this.scene.rotation.x += 0.05;
 		}
 
 		if (this.kbmap['ArrowDown']) {
-			this.camera.position.z += 0.1;
+			this.scene.rotation.x -= 0.05;
 		}
 
-		this.scene.rotation.x += (this.mouse.my / window.innerHeight) * Utils.TWO_PI;
-		this.scene.rotation.y += (this.mouse.mx / window.innerWidth) * Utils.TWO_PI;		
+		if (this.kbmap['ArrowLeft']) {
+			this.scene.rotation.y += 0.05;
+		}
 
-		if (this.mouse.buttons) {
+		if (this.kbmap['ArrowRight']) {
+			this.scene.rotation.y -= 0.05;
+		}
+
+		if (this.mouse.buttons)
+		{
+			let obj = this.mousePickObj();
+			if (obj) {
+				this.debugText(obj.name);
+				this.setTexture(obj, 7*9 + 0);
+			}
+
+
 			this.mouse.buttons = 0;
 		}
 
@@ -114,6 +121,22 @@ class Main extends NextGameGL {
 
 		this.mouse.mx = 0;
 		this.mouse.my = 0;		
+	}
+
+	mousePickObj()
+	{
+		let mousePos = {
+			x : this.mouse.x / this.canvas.width * 2 - 1, 
+			y: this.mouse.y / this.canvas.height * -2 + 1
+		};
+
+  	this.raycaster.setFromCamera(mousePos, this.camera);
+  	// get the list of objects the ray intersected
+  	const intersectedObjects = this.raycaster.intersectObjects(this.scene.children);
+  	if (intersectedObjects.length) {
+    	return intersectedObjects[0].object;
+    }
+    else return null;
 	}
 
 	createPlane()
