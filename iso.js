@@ -5,8 +5,10 @@ class Main extends NextGameGL {
 		super.init();
 		//this.fullScreen();
 
+		$('canvas').on('contextmenu', function(e){ return false; });
+
 		this.raycaster = new THREE.Raycaster();
-		this.selected = null;
+		this.selected = 0;
 
 		// (left, up, backward)
 		// let width = 20;
@@ -20,6 +22,11 @@ class Main extends NextGameGL {
 		this.texture = textureLoader.load( 'images/dg_features32.gif' );
 		this.texture.magFilter = THREE.NearestFilter;
 		//this.texture.anisotropy = 16;
+
+		this.box = this.createBox();
+		//const mat1 = new THREE.MeshLambertMaterial( { /*map: this.texture,*/ color: '#FFFFFF' } );
+		this.material = new THREE.MeshLambertMaterial( { map: this.texture, color: '#FFFFFF' } );
+		//const mat1 = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
 
 		this.createScene();
 		this.addLights();
@@ -53,21 +60,27 @@ class Main extends NextGameGL {
 
 	createScene()
 	{
-		const box = this.createBox();
-		//const mat1 = new THREE.MeshLambertMaterial( { /*map: this.texture,*/ color: '#FFFFFF' } );
-		const mat1 = new THREE.MeshLambertMaterial( { map: this.texture, color: '#FFFFFF' } );
-		//const mat1 = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-
-		//this.setTexture(box.py, 0);
-
 		for(let y = 0; y < 10; y++) {
 			for(let x = 0; x < 10; x++) {
-				let m = new THREE.Mesh(box.py.clone(), mat1);
+				let m = new THREE.Mesh(this.box.ny.clone(), this.material);
 				m.position.set(x - 5, 0, y - 5);
 				m.name = x + ',' + y;
 				if (x == y) this.setTexture(m, 8); else this.setTexture(m, 18);
 				this.scene.add(m);
 			}
+		}
+
+		this.addBlock(3, 3);
+	}
+
+	addBlock(x, y)
+	{
+		let box = this.box;
+		for(let p of [box.px, box.nx, box.pz, box.nz, box.py])
+		{
+			let m = new THREE.Mesh(p.clone(), this.material);
+			m.position.set(x - 5, 0, y - 5);
+			this.scene.add(m);
 		}
 	}
 
@@ -85,7 +98,14 @@ class Main extends NextGameGL {
 		// if (!this.isPointerLock()) {
 		// 	this.renderer.render( this.scene, this.camera );
 		// 	return;
-		// }		
+		// }
+
+		if (this.kb.key.match(/\d/)) {
+			let texture = [2*9, 7*9, 7*9+3, 9*9+3, 6*9+3, 11*9,  12*9+3, 5*9+1, 9+3, 8*9+3];
+			console.log(Number(this.kb.key));
+			this.selected = texture[Number(this.kb.key)];
+			this.kb.key = '';
+		}
 
 		if (this.kbmap['ArrowUp']) {
 			this.scene.rotation.x += 0.05;
@@ -103,22 +123,34 @@ class Main extends NextGameGL {
 			this.scene.rotation.y -= 0.05;
 		}
 
-		if (this.mouse.buttons)
+		if (this.kbmap['+']) {
+			this.scene.position.z += 0.05;
+		}
+
+		if (this.kbmap['-']) {
+			this.scene.position.z -= 0.05;
+		}
+
+		if (this.mouse.buttons == this.MB_LEFT)
 		{
 			let obj = this.mousePickObj();
 			if (obj) {
 				this.debugText(obj.name);
-				this.setTexture(obj, 7*9 + 0);
+				this.setTexture(obj, this.selected);
 			}
+		}
 
-
-			this.mouse.buttons = 0;
+		if (this.mouse.buttons == this.MB_RIGHT)
+		{
+			let obj = this.mousePickObj();
+			if (obj && obj.name) {
+				let pos = obj.name.split(',');
+				this.addBlock(pos[0], pos[1]);
+			}
 		}
 
 		this.renderer.render( this.scene, this.camera );
-
-		this.mouse.mx = 0;
-		this.mouse.my = 0;		
+		this.mouse.buttons = 0;
 	}
 
 	mousePickObj()
