@@ -59,6 +59,11 @@ class Utils
 		return Object.assign({}, obj);
 	}
 
+	static key()
+	{
+		return Object.values(arguments).join();
+	}
+
 	static getUrlParam(name)
 	{
 		let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);

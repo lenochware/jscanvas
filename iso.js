@@ -9,6 +9,8 @@ class Main extends NextGameGL {
 
 		this.raycaster = new THREE.Raycaster();
 		this.selected = 0;
+		this.level = {};
+		this.changed = false;
 
 		//this.setOrtho(20, 10);
 
@@ -50,6 +52,9 @@ class Main extends NextGameGL {
 
 		 m.geometry.uvsNeedUpdate = true;
 
+		 this.level[m.name] = {tex: idx};
+		 this.changed = true;
+
 	 // geometry.faceVertexUvs[0].push(
 	 //  // front
 	 //  [ new THREE.Vector2(u, v), new THREE.Vector2(u + 1/w, v + 1/h), new THREE.Vector2(u, v + 1/h) ],
@@ -64,8 +69,9 @@ class Main extends NextGameGL {
 			for(let x = 0; x < 10; x++) {
 				let m = new THREE.Mesh(this.box.ny.clone(), this.material);
 				m.position.set(x - 5, 0, y - 5);
-				m.name = x + ',' + y;
-				if (x == y) this.setTexture(m, 8); else this.setTexture(m, 18);
+				m.name = Utils.key(x,y,'ny');
+				let tex = (x == y)? 8 : 18;
+				this.setTexture(m, tex);
 				this.scene.add(m);
 			}
 		}
@@ -73,13 +79,29 @@ class Main extends NextGameGL {
 		this.addBlock(3, 3);
 	}
 
+	redrawLevel()
+	{
+		this.scene = new THREE.Scene();
+		for(let key of Object.keys(this.level)) {
+			let pos = key.split(',');
+			let tex = this.level[key].tex;
+			let m = new THREE.Mesh(this.box[pos[2]].clone(), this.material);
+			m.position.set(pos[0] - 5, 0, pos[1] - 5);
+			m.name = key;
+			this.setTexture(m, tex);
+			this.scene.add(m);
+		}
+		this.addLights();
+	}
+
 	addBlock(x, y)
 	{
-		let box = this.box;
-		for(let p of [box.px, box.nx, box.pz, box.nz, box.py])
+		for(let p of ['px', 'nx', 'pz', 'nz', 'py'])
 		{
-			let m = new THREE.Mesh(p.clone(), this.material);
+			let m = new THREE.Mesh(this.box[p].clone(), this.material);
+			m.name = Utils.key(x,y,p);
 			m.position.set(x - 5, 0, y - 5);
+			this.setTexture(m, 12*9+2);
 			this.scene.add(m);
 		}
 	}
@@ -142,6 +164,16 @@ class Main extends NextGameGL {
 			this.camera.updateProjectionMatrix();
 		}
 
+		if (this.kb.key == 's') {
+			localStorage.setItem('lev01', JSON.stringify(this.level));
+			this.debugText('Level saved.');
+		}
+
+		if (this.kbmap['l']) {
+			this.level = JSON.parse(localStorage.getItem('lev01'));
+			this.debugText('Level loaded.');
+			this.redrawLevel();
+		}
 
 		if (this.mouse.buttons == this.MB_LEFT)
 		{
@@ -155,14 +187,13 @@ class Main extends NextGameGL {
 		if (this.mouse.buttons == this.MB_RIGHT)
 		{
 			let obj = this.mousePickObj();
-			if (obj && obj.name) {
-				let pos = obj.name.split(',');
-				this.addBlock(pos[0], pos[1]);
-			}
+			let pos = obj? obj.name.split(',') : '';
+			if (pos[2] == 'ny') this.addBlock(pos[0], pos[1]);
 		}
 
 		this.renderer.render( this.scene, this.camera );
 		this.mouse.buttons = 0;
+		this.kb.key = '';
 	}
 
 	mousePickObj()
