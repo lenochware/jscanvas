@@ -6,10 +6,11 @@ class Main extends NextGameGL {
 		this.fullScreen();
 
 		// (left, up, backward)
-		this.camera.position.set(0, 0.5, 5);
-		this.camera.lookAt(0, 0.5, 0);
+		this.camera.position.set(0, 0.2, 5);
+		this.camera.lookAt(0, 0.2, 0);
 		this.camera.rotation.order = "YXZ"; 		
 
+		this.light = null;
 		this.level = this.level = JSON.parse(localStorage.getItem('lev01'));
 
 		this.player = new Player(this);
@@ -24,11 +25,12 @@ class Main extends NextGameGL {
 		this.material = new THREE.MeshLambertMaterial( { map: this.texture, color: '#FFFFFF' } );
 
 		this.createScene();
-		this.addLights();
 	}
 
 	createScene()
 	{
+		this.scene.background = new THREE.Color( 0x6666ff );
+
 		for(let key of Object.keys(this.level)) {
 			let pos = key.split(',');
 			let tex = this.level[key].tex;
@@ -44,11 +46,16 @@ class Main extends NextGameGL {
 
 	addLights()
 	{
-		// this.light = new THREE.PointLight(0xFFFFFF, 1);
-		// this.light.position.copy(this.camera.position);
-		// this.scene.add(this.light);		
+		this.light = new THREE.PointLight(0xFFFFFF, 2, 6);
+		this.light.position.copy(this.camera.position);
+		//this.light.position.set(4, 3, 4);
+		//this.scene.add(this.light);		
 
-		const am = new THREE.AmbientLight( 0xffffff ); // soft white light
+		let directionalLight = new THREE.DirectionalLight( 0x999999, 2 );
+		directionalLight.position.set( 1, 1, 0.5 ).normalize();
+		this.scene.add( directionalLight );
+
+		const am = new THREE.AmbientLight( 0x333333 ); // soft white light
 		this.scene.add(am);
 	}
 
@@ -97,6 +104,7 @@ class Main extends NextGameGL {
 		// )  
 
 		this.renderer.render( this.scene, this.camera );
+		this.light.position.copy(this.camera.position);
 
 		this.mouse.mx = 0;
 		this.mouse.my = 0;
@@ -173,6 +181,8 @@ class Main extends NextGameGL {
 			[ new THREE.Vector2(0, 0), new THREE.Vector2(0, 0), new THREE.Vector2(0, 0) ],
 			[ new THREE.Vector2(0, 0), new THREE.Vector2(0, 0), new THREE.Vector2(0, 0) ],
 		);
+
+		geometry.computeFaceNormals();
 	 
 		return geometry;
 }
