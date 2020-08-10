@@ -161,8 +161,14 @@ class Player
 		this.game = game;
 		this.camera = game.camera;
 		this.height = 0.6;
+
+		this.pos = new THREE.Vector3();
 		this.setPos(x, y);
-		this.moveAnimation = null;	
+		this.rot = this.camera.rotation.y;
+		this.lookingVec = this.getLookingVec(this.rot);
+		//this.lookingVec = this.camera.getWorldDirection();
+
+		this.moveAnimation = null;
 	}
 
 	startAnimation(id, duration)
@@ -175,7 +181,14 @@ class Player
 		let anim = this.moveAnimation;
 		if (!anim) return;
 
-		if (anim.id == 'moveForward') this.moveForward();
+		anim.phase = anim.frame / anim.duration;
+
+		switch (anim.id) {
+			case 'moveForward': this.moveForward(); break;
+			case 'moveBackward': this.moveForward(-1); break;
+			case 'turnLeft': this.turnLeft(); break;
+			case 'turnRight': this.turnLeft(-1); break;
+		}
 
 		anim.frame++;
 		if (anim.frame > anim.duration) {
@@ -184,14 +197,35 @@ class Player
 
 	}
 
-	moveForward()
+	getLookingVec(rot)
 	{
-		console.log(this.moveAnimation.frame);
+		return new THREE.Vector3( -Math.sin(rot), 0, 	-Math.cos(rot) );
+	}
+
+	moveForward(dir = 1)
+	{	
+		let anim = this.moveAnimation;
+		let v = this.lookingVec.clone().multiplyScalar( dir * anim.phase ).add(this.pos);
+		this.camera.position.copy(v);
+
+		if (anim.phase == 1) {
+			this.setPos(v.x, v.z);
+		}
+	}
+
+	turnLeft(dir = 1)
+	{
+		let anim = this.moveAnimation;
+		this.camera.rotation.y = this.rot + (dir * anim.phase * Math.PI / 2);
+		if (anim.phase == 1) {
+			this.rot = this.camera.rotation.y;
+			this.lookingVec = this.getLookingVec(this.rot);
+		}
 	}
 
 	setPos(x, y)
 	{
-		this.pos = {x, y};
+		this.pos.set(x, this.height, y);
 		this.camera.position.set(x, this.height, y);
 	}
 
@@ -210,53 +244,24 @@ class Player
 
 		if (key == 'ArrowUp') {
 			this.startAnimation('moveForward', 20);
-			console.log('start animation');
 		}
+		else if (key == 'ArrowDown') {
+			this.startAnimation('moveBackward', 20);
+		}
+		else if (key == 'ArrowLeft') {
+			this.startAnimation('turnLeft', 10);
+		}
+		else if (key == 'ArrowRight') {
+			this.startAnimation('turnRight', 10);
+		}		
 	}
 
 	update()
 	{
-		this.listenKeyboard();
 		let anim = this.moveAnimation;
+
 		if (anim) this.playAnimation();
+		else this.listenKeyboard();
 	}
 
-	// playerMove()
-	// {
-	// 	let pos = this.camera.position;
-
-	// 	if (this.kbmap['ArrowUp']) {
-	// 		pos.x -= Math.sin(this.camera.rotation.y) * .05;
-	// 		pos.z -= Math.cos(this.camera.rotation.y) * .05;	
-	// 	}
-
-	// 	if (this.kbmap['ArrowDown']) {
-	// 		pos.x += Math.sin(this.camera.rotation.y) * .05;
-	// 		pos.z += Math.cos(this.camera.rotation.y) * .05;
-	// 	}
-
-
-	// 	if (this.kbmap['ArrowLeft']) {
-	// 		pos.x -= Math.cos(this.camera.rotation.y) * .05;
-	// 		pos.z -= -Math.sin(this.camera.rotation.y) * .05;			
-	// 	}
-
-	// 	if (this.kbmap['ArrowRight']) {
-	// 		pos.x += Math.cos(this.camera.rotation.y) * .05;
-	// 		pos.z += -Math.sin(this.camera.rotation.y) * .05;			
-	// 	}
-	// }
-
-	// moveForward(t)
-	// {
-	// 	let a = new THREE.Vector3(
-	// 		-Math.sin(this.camera.rotation.y), 
-	// 		0, 
-	// 		-Math.cos(this.camera.rotation.y)
-	// 	);
-
-	// 	let pos = this.camera.position;
-	// 	pos.x -= Math.sin(this.camera.rotation.y) * .05;
-	// 	pos.z -= Math.cos(this.camera.rotation.y) * .05;
-	// }
 }
