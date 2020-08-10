@@ -189,6 +189,8 @@ class Player
 			case 'moveBackward': this.moveForward(-1); break;
 			case 'turnLeft': this.turnLeft(); break;
 			case 'turnRight': this.turnLeft(-1); break;
+			case 'bounceForward': this.bounce(.2); break;
+			case 'bounceBackward': this.bounce(-.2); break;
 		}
 
 		anim.frame++;
@@ -212,6 +214,21 @@ class Player
 		if (anim.phase == 1) {
 			this.setPos(v.x, v.z);
 		}
+	}
+
+	bounce(dir = .2)
+	{
+		let anim = this.moveAnimation;
+		let v = null;
+
+		if (anim.phase < .5) {
+			v = this.lookingVec.clone().multiplyScalar(dir * Utils.smoothStep(anim.phase) ).add(this.pos);
+		}
+		else {
+			v = this.lookingVec.clone().multiplyScalar(dir * Utils.smoothStep(1 - anim.phase) ).add(this.pos);			
+		}
+
+		this.camera.position.copy(v);
 	}
 
 	canPass(dir)
@@ -252,12 +269,17 @@ class Player
 		if (key == 'ArrowUp') {
 			if (this.canPass(1))
 				this.startAnimation('moveForward', 20);
+			else 
+				this.startAnimation('bounceForward', 10);
 
 			this.game.kb.key = '';
 		}
 		else if (key == 'ArrowDown') {
 			if (this.canPass(-1))
 				this.startAnimation('moveBackward', 20);
+			else 
+				this.startAnimation('bounceBackward', 10);
+
 			this.game.kb.key = '';			
 		}
 		else if (key == 'ArrowLeft') {
