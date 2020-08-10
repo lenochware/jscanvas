@@ -73,7 +73,6 @@ class Main extends NextGameGL {
 		this.renderer.render( this.scene, this.camera );
 		this.light.position.copy(this.camera.position);
 
-		this.kb.key = '';
 		this.mouse.mx = this.mouse.my = 0;
 	}
 
@@ -215,6 +214,12 @@ class Player
 		}
 	}
 
+	canPass(dir)
+	{
+		let pos = this.lookingVec.clone().multiplyScalar(dir).add(this.pos);
+		return !this.game.level[Utils.key(Math.round(pos.x)+5, Math.round(pos.z)+5, 'py')];
+	}
+
 	turnLeft(dir = 1)
 	{
 		let anim = this.moveAnimation;
@@ -245,16 +250,23 @@ class Player
 		let key = this.game.kb.key;
 
 		if (key == 'ArrowUp') {
-			this.startAnimation('moveForward', 20);
+			if (this.canPass(1))
+				this.startAnimation('moveForward', 20);
+
+			this.game.kb.key = '';
 		}
 		else if (key == 'ArrowDown') {
-			this.startAnimation('moveBackward', 20);
+			if (this.canPass(-1))
+				this.startAnimation('moveBackward', 20);
+			this.game.kb.key = '';			
 		}
 		else if (key == 'ArrowLeft') {
 			this.startAnimation('turnLeft', 15);
+			this.game.kb.key = '';			
 		}
 		else if (key == 'ArrowRight') {
 			this.startAnimation('turnRight', 15);
+			this.game.kb.key = '';			
 		}		
 	}
 
