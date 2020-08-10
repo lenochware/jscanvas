@@ -45,6 +45,11 @@ class Utils
 		return Math.max(a, Math.min(x, b));
 	}
 
+	static smoothStep(x)
+	{
+		return x * x * (3 - 2 * x);
+	}
+
 	static isEmpty(obj)
 	{
 		if (typeof obj === 'array') {

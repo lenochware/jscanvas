@@ -6,6 +6,8 @@ class Main extends NextGameGL {
 		//this.fullScreen();
 
 		this.camera.rotation.order = "YXZ";
+		this.camera.fov = 65;
+		this.camera.updateProjectionMatrix();
 		//this.camera.position.set(x, this.height, y);
 		//this.camera.lookAt(0, 0.6, 0);
 
@@ -205,7 +207,7 @@ class Player
 	moveForward(dir = 1)
 	{	
 		let anim = this.moveAnimation;
-		let v = this.lookingVec.clone().multiplyScalar( dir * anim.phase ).add(this.pos);
+		let v = this.lookingVec.clone().multiplyScalar( dir * Utils.smoothStep(anim.phase) ).add(this.pos);
 		this.camera.position.copy(v);
 
 		if (anim.phase == 1) {
@@ -216,7 +218,7 @@ class Player
 	turnLeft(dir = 1)
 	{
 		let anim = this.moveAnimation;
-		this.camera.rotation.y = this.rot + (dir * anim.phase * Math.PI / 2);
+		this.camera.rotation.y = this.rot + (dir * Utils.smoothStep(anim.phase) * Math.PI / 2);
 		if (anim.phase == 1) {
 			this.rot = this.camera.rotation.y;
 			this.lookingVec = this.getLookingVec(this.rot);
@@ -249,10 +251,10 @@ class Player
 			this.startAnimation('moveBackward', 20);
 		}
 		else if (key == 'ArrowLeft') {
-			this.startAnimation('turnLeft', 10);
+			this.startAnimation('turnLeft', 15);
 		}
 		else if (key == 'ArrowRight') {
-			this.startAnimation('turnRight', 10);
+			this.startAnimation('turnRight', 15);
 		}		
 	}
 
