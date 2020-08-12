@@ -47,7 +47,7 @@ class Main extends NextGameGL {
 
 		 m.geometry.uvsNeedUpdate = true;
 
-		 this.level[m.name] = {tex: idx};
+		 //this.level[m.name] = {tex: idx};
 
 	}
 
@@ -56,14 +56,15 @@ class Main extends NextGameGL {
 		this.scene = new THREE.Scene();
 		let lev = this.level;
 
-		for(let y = 0; y < lev.height; y++) {
-			for(let x = 0; x < lev.width; x++) {
-				let m = new THREE.Mesh(this.box.ny.clone(), this.material);
-				m.position.set(x - lev.width/2, 0, y - lev.height/2);
-				m.name = Utils.key(x,y);
-				this.setTexture(m, lev.get(x,y).index);
-				this.scene.add(m);
-			}
+
+		for(let pos = 0; pos < lev.width * lev.height; pos++)
+		{
+			let cell = lev.get(pos);
+			let m = new THREE.Mesh(this.box.ny.clone(), this.material);
+			m.position.set(cell.x - lev.width/2, 0, cell.y - lev.height/2);
+			m.name = pos;
+			this.setTexture(m, cell.index);
+			this.scene.add(m);
 		}
 
 		this.scene.add( new THREE.AmbientLight(0xffffff) );
@@ -137,7 +138,7 @@ class Main extends NextGameGL {
 			if (obj) {
 				this.debugText(obj.name);
 				this.setTexture(obj, this.selected);
-				let pos = obj.name.split(',');
+				this.level.set(obj.name + 0, this.selected, 20);
 			}
 		}
 
@@ -234,18 +235,24 @@ class Level
 {
 	constructor(w, h)
 	{
-		this.data = [];	
+		this.cells = [];	
 		this.createEmpty(w, h);
 	}
 
-	get(x, y)
-	{
-		return this.data[y][x];
+	pos(x, y) {
+		return y * this.width + x;
 	}
 
-	set(x, y, index, energy)
+	get(pos)
 	{
-		return this.data[y][x] = {index, energy};
+		return this.cells[pos];
+	}
+
+	set(pos, index, energy)
+	{
+		let x = pos % this.width;
+		let y =  pos / this.width | 0;
+		return this.cells[pos] = {x, y, index, energy};
 	}
 
 	createEmpty(w,h)
@@ -253,12 +260,13 @@ class Level
 		this.width = w;
 		this.height = h;
 
-		for(let y = 0; y < h; y++) {
-			let row = [];
-			for(let x = 0; x < w; x++) {
-				row.push({index: (x == y)? 8 : 18, energy: 1});
-			}
-			this.data.push(row);
+		for(let pos = 0; pos < w * h; pos++) {
+			this.cells.push({
+				x: pos % w,
+				y: pos / w | 0,
+				index: (pos % this.width == Math.floor(pos / this.width))? 8 : 18, 
+				energy: 1
+			});
 		}
 	}
 
