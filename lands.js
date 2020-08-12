@@ -9,7 +9,7 @@ class Main extends NextGameGL {
 
 		this.raycaster = new THREE.Raycaster();
 		this.selected = 0;
-		this.level = {};
+		this.level = new Level(10, 10);
 
 		//this.setOrtho(20, 10);
 
@@ -53,33 +53,20 @@ class Main extends NextGameGL {
 
 	createScene()
 	{
-		for(let y = 0; y < 10; y++) {
-			for(let x = 0; x < 10; x++) {
+		this.scene = new THREE.Scene();
+		let lev = this.level;
+
+		for(let y = 0; y < lev.height; y++) {
+			for(let x = 0; x < lev.width; x++) {
 				let m = new THREE.Mesh(this.box.ny.clone(), this.material);
-				m.position.set(x - 5, 0, y - 5);
-				m.name = Utils.key(x,y,'ny');
-				let tex = (x == y)? 8 : 18;
-				this.setTexture(m, tex);
+				m.position.set(x - lev.width/2, 0, y - lev.height/2);
+				m.name = Utils.key(x,y);
+				this.setTexture(m, lev.get(x,y).index);
 				this.scene.add(m);
 			}
 		}
 
 		this.scene.add( new THREE.AmbientLight(0xffffff) );
-	}
-
-	redrawLevel()
-	{
-		this.scene = new THREE.Scene();
-		for(let key of Object.keys(this.level)) {
-			let pos = key.split(',');
-			let tex = this.level[key].tex;
-			let m = new THREE.Mesh(this.box[pos[2]].clone(), this.material);
-			m.position.set(pos[0] - 5, 0, pos[1] - 5);
-			m.name = key;
-			this.setTexture(m, tex);
-			this.scene.add(m);
-		}
-		this.addLights();
 	}
 
 	update()
@@ -141,7 +128,7 @@ class Main extends NextGameGL {
 		if (this.kbmap['l']) {
 			this.level = JSON.parse(localStorage.getItem('lands01'));
 			this.debugText('Level loaded.');
-			this.redrawLevel();
+			this.createScene();
 		}
 
 		if (this.mouse.buttons == this.MB_LEFT)
@@ -150,6 +137,7 @@ class Main extends NextGameGL {
 			if (obj) {
 				this.debugText(obj.name);
 				this.setTexture(obj, this.selected);
+				let pos = obj.name.split(',');
 			}
 		}
 
@@ -248,6 +236,16 @@ class Level
 	{
 		this.data = [];	
 		this.createEmpty(w, h);
+	}
+
+	get(x, y)
+	{
+		return this.data[y][x];
+	}
+
+	set(x, y, index, energy)
+	{
+		return this.data[y][x] = {index, energy};
 	}
 
 	createEmpty(w,h)
