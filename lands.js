@@ -26,6 +26,25 @@ class Main extends NextGameGL {
 
 		this.box = this.createBox();
 		this.material = new THREE.MeshLambertMaterial( { map: this.texture, color: '#FFFFFF' } );
+
+		this.cells = {
+			rock:  {texture: 2*9, energy: 1},
+			earth: {texture: 9*9+3, energy: 1},
+			water: {texture: 7*9+3, energy: 1},
+			grass: {texture: 7*9, energy: 1},
+			flower: {texture: 8*9, energy: 2},
+			tree: {texture: 8*9+3, energy: 2}
+		}
+
+		
+		this.xtab = {
+			//'rock x rock': 'earth',
+			'rock+water': 'earth',
+			'earth+water': 'grass',
+			'grass+grass': 'flower',
+			'flower+water': 'tree',
+		}
+
 		this.createScene();
 	}
 
@@ -63,7 +82,7 @@ class Main extends NextGameGL {
 			let m = new THREE.Mesh(this.box.ny.clone(), this.material);
 			m.position.set(cell.x - lev.width/2, 0, cell.y - lev.height/2);
 			m.name = pos;
-			this.setTexture(m, cell.index);
+			this.setTexture(m, this.cells[cell.id].texture);
 			this.scene.add(m);
 		}
 
@@ -100,14 +119,6 @@ class Main extends NextGameGL {
 
 		if (this.kbmap['ArrowRight']) {
 			this.scene.rotation.y -= 0.05;
-		}
-
-		if (this.kbmap['+']) {
-			this.scene.position.z += 0.05;
-		}
-
-		if (this.kbmap['-']) {
-			this.scene.position.z -= 0.05;
 		}
 
 		// key '/' repeats ad infimum?
@@ -236,7 +247,7 @@ class Level
 	constructor(w, h)
 	{
 		this.cells = [];	
-		this.createEmpty(w, h);
+		this.create(w, h);
 	}
 
 	pos(x, y) {
@@ -248,14 +259,49 @@ class Level
 		return this.cells[pos];
 	}
 
-	set(pos, index, energy)
+	set(pos, id, energy, spread = 0)
 	{
 		let x = pos % this.width;
 		let y =  pos / this.width | 0;
-		return this.cells[pos] = {x, y, index, energy};
+		return this.cells[pos] = {x, y, id, energy, spread};
 	}
 
-	createEmpty(w,h)
+	push(pos, energy)
+	{
+		let c1 = this.get(pos);
+		let c2 = this.getNeighbour(pos);
+
+		let cellEnergy = c1.energy + energy;
+		if (cellEnergy < 0 /*|| cellEnergy > MAX_ENERGY */) return false;
+
+		//spread a mix jen kdyz energie neni zaporna.
+		//mixTable t1 x t2, tabulka id,energy -> textura
+
+		if (energy > 1) {
+			let id = this.mix(c1, c2);
+			let spread = cellEnergy;
+		}
+		else {
+			let id = c1.id;
+			let spread = 0;
+		}
+
+		this.set(pos, id, cellEnergy, spread);
+		return true;
+	}
+
+	mix(c1, c2)
+	{}
+
+	getNeighbour(pos)
+	{
+		
+	}
+
+	spread(pos)
+	{}
+
+	create(w,h)
 	{
 		this.width = w;
 		this.height = h;
@@ -264,13 +310,19 @@ class Level
 			this.cells.push({
 				x: pos % w,
 				y: pos / w | 0,
-				index: (pos % this.width == Math.floor(pos / this.width))? 8 : 18, 
-				energy: 1
+				id: (pos % this.width == Math.floor(pos / this.width))? 'water' : 'rock',
+				energy: 1,
+				spread: 0
 			});
 		}
 	}
 
 	update()
-	{}
+	{
+		for(let pos = 0; pos < this.cells.length; pos++) {
+			if (this.get(pos).spread > 0 && Math.random() < .3) this.spread(pos);
+		}
+
+	}
 
 }
