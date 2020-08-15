@@ -39,10 +39,10 @@ class Main extends NextGameGL {
 		
 		this.xtab = {
 			//'rock x rock': 'earth',
-			'rock+water': 'earth',
-			'earth+water': 'grass',
-			'grass+grass': 'flower',
-			'flower+water': 'tree',
+			'rock,water': 'earth',
+			'earth,water': 'grass',
+			'grass,grass': 'flower',
+			'flower,water': 'tree',
 		}
 
 		this.createScene();
@@ -208,7 +208,7 @@ class Main extends NextGameGL {
 		);
 	 
 		return geometry;
-}
+	}
 
 	createBox()
 	{
@@ -240,6 +240,7 @@ class Main extends NextGameGL {
 
 		return box;
 	}	
+
 }
 
 class Level
@@ -250,20 +251,32 @@ class Level
 		this.create(w, h);
 	}
 
-	pos(x, y) {
-		return y * this.width + x;
+	vec2(pos) {
+		return {x: pos % this.width, y: pos / this.width | 0};
 	}
 
-	get(pos)
+	get()
 	{
+		let pos, v;
+
+		if (arguments.length == 1) {
+			pos = arguments[0];
+			v = this.vec2(pos);
+		}
+		else {
+			v = {x: arguments[0], y: arguments[1]};
+			pos = v.y * this.width + v.x;
+		}
+
+		if (v.x < 0 || v.x >= this.width || v.y < 0 || v.y > this.height) return null;
+
 		return this.cells[pos];
 	}
 
 	set(pos, id, energy, spread = 0)
 	{
-		let x = pos % this.width;
-		let y =  pos / this.width | 0;
-		return this.cells[pos] = {x, y, id, energy, spread};
+		let v = this.vec2(pos);
+		return this.cells[pos] = {x: v.x, y: v.y, id, energy, spread};
 	}
 
 	push(pos, energy)
@@ -291,11 +304,39 @@ class Level
 	}
 
 	mix(c1, c2)
-	{}
+	{
+		return this.game.xtab[Utils.key(c1.id, c2.id)] || c1.id;
+	}
 
 	getNeighbour(pos)
 	{
-		
+		let cells = {};
+		let v = this.vec2(pos);
+
+		function add(c) {
+			if (c && cells[c.id]) cells[c.id] += c.energy;
+			else if (c) cells[c.id] = c.energy;			
+		}
+
+		add(this.get(v.x - 1, v.y));
+		add(this.get(v.x + 1, v.y));
+		add(this.get(v.x, v.y - 1));
+		add(this.get(v.x, v.y + 1));
+
+		return cells;
+	}
+
+	getMaxNeighbour(pos)
+	{
+		let cells = this.getNeighbour(pos);
+		let maxCells = [];
+		let max = Math.max(...Object.values(cells));
+		for (const [id, energy] of Object.entries(cells)) {
+		  if (energy != max) continue;
+		  maxCells.push({id, energy})
+		}
+
+		return maxCells[Math.floor(Math.random() * maxCells.length)];
 	}
 
 	spread(pos)
