@@ -9,7 +9,7 @@ class Main extends NextGameGL {
 
 		this.raycaster = new THREE.Raycaster();
 		this.selected = 0;
-		this.level = new Level(10, 10);
+		this.level = new Level(this, 4, 3);
 
 		//this.setOrtho(20, 10);
 
@@ -143,18 +143,16 @@ class Main extends NextGameGL {
 			this.createScene();
 		}
 
-		if (this.mouse.buttons == this.MB_LEFT)
+		if (this.mouse.buttons)
 		{
+			let energy = (this.mouse.buttons == this.MB_LEFT)? 1 : -1;
 			let obj = this.mousePickObj();
 			if (obj) {
-				this.debugText(obj.name);
-				this.setTexture(obj, this.selected);
-				this.level.set(obj.name + 0, this.selected, 20);
+				let pos = obj.name + 0;
+				this.debugText(pos);
+				this.level.push(pos, energy);
+				this.setTexture(obj, this.cells[this.level.get(pos).id].texture);
 			}
-		}
-
-		if (this.mouse.buttons == this.MB_RIGHT)
-		{
 		}
 
 		this.renderer.render( this.scene, this.camera );
@@ -245,8 +243,9 @@ class Main extends NextGameGL {
 
 class Level
 {
-	constructor(w, h)
+	constructor(game, w, h)
 	{
+		this.game = game;
 		this.cells = [];	
 		this.create(w, h);
 	}
@@ -282,21 +281,22 @@ class Level
 	push(pos, energy)
 	{
 		let c1 = this.get(pos);
-		let c2 = this.getNeighbour(pos);
+		let c2 = this.getMaxNeighbour(pos);
 
 		let cellEnergy = c1.energy + energy;
 		if (cellEnergy < 0 /*|| cellEnergy > MAX_ENERGY */) return false;
 
 		//spread a mix jen kdyz energie neni zaporna.
 		//mixTable t1 x t2, tabulka id,energy -> textura
+		let id, spread;
 
-		if (energy > 1) {
-			let id = this.mix(c1, c2);
-			let spread = cellEnergy;
+		if (energy > 0) {
+			id = this.mix(c1, c2);
+			spread = cellEnergy;
 		}
 		else {
-			let id = c1.id;
-			let spread = 0;
+			id = c1.id;
+			spread = 0;
 		}
 
 		this.set(pos, id, cellEnergy, spread);
@@ -305,6 +305,7 @@ class Level
 
 	mix(c1, c2)
 	{
+		console.log(Utils.key(c1.id, c2.id), c1.energy, c2.energy);
 		return this.game.xtab[Utils.key(c1.id, c2.id)] || c1.id;
 	}
 
