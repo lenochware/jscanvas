@@ -8,8 +8,8 @@ class Main extends NextGameGL {
 		$('canvas').on('contextmenu', function(e){ return false; });
 
 		this.raycaster = new THREE.Raycaster();
-		this.selected = 0;
-		this.level = new Level(this, 4, 3);
+		this.selected = '';
+		this.level = new Level(this, 10, 10);
 
 		//this.setOrtho(20, 10);
 
@@ -28,21 +28,13 @@ class Main extends NextGameGL {
 		this.material = new THREE.MeshLambertMaterial( { map: this.texture, color: '#FFFFFF' } );
 
 		this.cells = {
-			rock:  {texture: 2*9, energy: 1},
-			earth: {texture: 9*9+3, energy: 1},
-			water: {texture: 7*9+3, energy: 1},
-			grass: {texture: 7*9, energy: 1},
-			flower: {texture: 8*9, energy: 2},
-			tree: {texture: 8*9+3, energy: 2}
-		}
-
-		
-		this.xtab = {
-			//'rock x rock': 'earth',
-			'rock,water': 'earth',
-			'earth,water': 'grass',
-			'grass,grass': 'flower',
-			'flower,water': 'tree',
+			growing: {texture: 8,   energy: 0},
+			rock:  {texture: 2*9,   energy: 0},
+			earth: {texture: 9*9+3, energy: 0},
+			water: {texture: 7*9+3, energy: 8, spread: 'grass'},
+			grass: {texture: 7*9,   energy: 1, base: 'earth' },
+			tree:  {texture: 8*9+3, energy: 8},
+			flower: {texture: 8*9,  energy: 2},
 		}
 
 		this.createScene();
@@ -145,12 +137,16 @@ class Main extends NextGameGL {
 
 		if (this.mouse.buttons)
 		{
-			let energy = (this.mouse.buttons == this.MB_LEFT)? 1 : -1;
 			let obj = this.mousePickObj();
 			if (obj) {
 				let pos = obj.name + 0;
-				this.debugText(pos);
-				this.level.push(pos, energy);
+				if (this.mouse.buttons == this.MB_LEFT) {
+					this.level.push(pos);
+				}
+				else {
+					this.level.pop(pos);
+				}
+
 				this.setTexture(obj, this.cells[this.level.get(pos).id].texture);
 			}
 		}
@@ -278,45 +274,39 @@ class Level
 		return this.cells[pos] = {x: v.x, y: v.y, id, energy, spread};
 	}
 
-	push(pos, energy)
+  push(pos)
+  {
+  	if (!this.game.selected) return false;
+  	let c = this.get(pos);
+  	if (this.getType(c.id).energy != 0) return false;  	
+
+  	if (c.owner == 1 || this.isBorder(pos))
+  	{
+	  	c.id = this.game.selected;
+	  	c.owner = 1;
+	  	this.game.selected = '';
+  		return true;
+  	};
+
+  	return false;
+  }
+
+	pop(pos)
 	{
-		let c1 = this.get(pos);
-		let c2 = this.getMaxNeighbour(pos);
-
-		let cellEnergy = c1.energy + energy;
-		if (cellEnergy < 0 /*|| cellEnergy > MAX_ENERGY */) return false;
-
-		//spread a mix jen kdyz energie neni zaporna.
-		//mixTable t1 x t2, tabulka id,energy -> textura
-		let id, spread;
-
-		if (energy > 0) {
-			id = this.mix(c1, c2);
-			spread = cellEnergy;
-		}
-		else {
-			id = c1.id;
-			spread = 0;
-		}
-
-		this.set(pos, id, cellEnergy, spread);
+		let c = this.get(pos);
+		if (c.owner != 1 || this.game.selected || this.getType(c.id).energy == 0) return false;
+		this.game.selected = c.id;
+		c.id = 'earth';
 		return true;
-	}
-
-	mix(c1, c2)
-	{
-		console.log(Utils.key(c1.id, c2.id), c1.energy, c2.energy);
-		return this.game.xtab[Utils.key(c1.id, c2.id)] || c1.id;
 	}
 
 	getNeighbour(pos)
 	{
-		let cells = {};
+		let cells = [];
 		let v = this.vec2(pos);
 
 		function add(c) {
-			if (c && cells[c.id]) cells[c.id] += c.energy;
-			else if (c) cells[c.id] = c.energy;			
+			if (c) cells.push(c);
 		}
 
 		add(this.get(v.x - 1, v.y));
@@ -327,17 +317,18 @@ class Level
 		return cells;
 	}
 
-	getMaxNeighbour(pos)
+	getType(id)
 	{
-		let cells = this.getNeighbour(pos);
-		let maxCells = [];
-		let max = Math.max(...Object.values(cells));
-		for (const [id, energy] of Object.entries(cells)) {
-		  if (energy != max) continue;
-		  maxCells.push({id, energy})
-		}
+		return this.game.cells[id];
+	}
 
-		return maxCells[Math.floor(Math.random() * maxCells.length)];
+	isBorder(pos)
+	{
+  	for(let cell of this.getNeighbour(pos)) {
+  		if (cell.owner == 1) return true;
+  	}
+
+  	return false;
 	}
 
 	spread(pos)
@@ -349,20 +340,22 @@ class Level
 		this.height = h;
 
 		for(let pos = 0; pos < w * h; pos++) {
+			let v = this.vec2(pos);
 			this.cells.push({
-				x: pos % w,
-				y: pos / w | 0,
-				id: (pos % this.width == Math.floor(pos / this.width))? 'water' : 'rock',
-				energy: 1,
-				spread: 0
+				x: v.x,
+				y: v.y,
+				id: (v.x < 4 && v.y > 6)? 'earth' : 'rock',
+				owner: (v.x < 4 && v.y > 6)? 1 : 0
 			});
 		}
+
+		this.cells[9*w+1].id = 'grass';
 	}
 
 	update()
 	{
 		for(let pos = 0; pos < this.cells.length; pos++) {
-			if (this.get(pos).spread > 0 && Math.random() < .3) this.spread(pos);
+			//if (this.get(pos).spread > 0 && Math.random() < .3) this.spread(pos);
 		}
 
 	}
