@@ -285,6 +285,8 @@ class Level
 	  	c.id = this.game.selected;
 	  	c.owner = 1;
 	  	this.game.selected = '';
+	  	this.game.debugText(' --- ');
+
   		return true;
   	};
 
@@ -294,9 +296,14 @@ class Level
 	pop(pos)
 	{
 		let c = this.get(pos);
-		if (c.owner != 1 || this.game.selected || this.getType(c.id).energy == 0) return false;
+		if (this.game.selected || this.getType(c.id).energy == 0) return false;
+		if (c.owner == 0 && this.isBorder(pos)) c.owner = 1;
+		if (c.owner != 1) return false;
+
 		this.game.selected = c.id;
 		c.id = 'earth';
+
+		this.game.debugText(this.game.selected);
 		return true;
 	}
 
@@ -350,6 +357,8 @@ class Level
 		}
 
 		this.cells[9*w+1].id = 'grass';
+		this.cells[9*w+2].id = 'water';
+		this.cells[4*w+3].id = 'tree';
 	}
 
 	update()
