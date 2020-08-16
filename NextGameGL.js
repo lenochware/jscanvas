@@ -15,6 +15,8 @@ class NextGameGL {
 		this.MB_LEFT = 1;
 		this.MB_RIGHT = 2;
 		this.MB_MIDDLE = 4;
+
+		this.startTime = this.now();
 	}
 
 	start()
@@ -86,6 +88,11 @@ class NextGameGL {
 		return Date.now();
 	}
 
+	time(delta = 0.0)
+	{
+		return (this.now() - this.startTime) / 1000 + delta;
+	}
+
 	initThreeJs()
 	{
 		this.scene = new THREE.Scene();
@@ -98,37 +105,6 @@ class NextGameGL {
 		this.canvas = this.renderer.domElement;
 		document.body.appendChild( this.canvas );
 	}
-
-	// width(num)
-	// {
-	// 	if (num) {
-	// 		this.context.canvas.width = num;
-	// 	}
-
-	// 	return this.context.canvas.width;
-	// }
-
-	// height(num)
-	// {
-	// 	if (num) {
-	// 		this.context.canvas.height = num;
-	// 	}
-
-	// 	return this.context.canvas.height;
-	// }
-
-	// screenWidth()
-	// {
-	// 	let r = this.element.getBoundingClientRect();
-	// 	return r.width;
-	// }
-
-	// screenHeight()
-	// {
-	// 	let r = this.element.getBoundingClientRect();
-	// 	return r.height;
-	// }
-
 
 	initKeyboard()
 	{
@@ -202,8 +178,6 @@ class NextGameGL {
 			m.offsetX = m.offsetY = 0;
 		}
 	}
-
-
 
 	fullScreen()
 	{

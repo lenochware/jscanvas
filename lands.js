@@ -84,19 +84,8 @@ class Main extends NextGameGL {
 	update()
 	{
 		this.requestUpdate();
-			
-		// if (!this.isPointerLock()) {
-		// 	this.renderer.render( this.scene, this.camera );
-		// 	return;
-		// }
-
-		if (this.kb.key.match(/\d/)) {
-			let texture = [2*9, 7*9, 7*9+3, 9*9+3, 6*9+3, 11*9,  12*9+3, 5*9+1, 9+3, 8*9+3];
-			console.log(Number(this.kb.key));
-			this.selected = texture[Number(this.kb.key)];
-			this.kb.key = '';
-		}
-
+		this.level.update();
+		
 		if (this.kbmap['ArrowUp']) {
 			this.scene.rotation.x += 0.05;
 		}
@@ -147,7 +136,10 @@ class Main extends NextGameGL {
 					this.level.pop(pos);
 				}
 
-				this.setTexture(obj, this.cells[this.level.get(pos).id].texture);
+				let c = this.level.get(pos);
+				let texture = this.cells[ c.growing? 'growing' : c.id].texture;
+
+				this.setTexture(obj, texture);
 			}
 		}
 
@@ -268,24 +260,28 @@ class Level
 		return this.cells[pos];
 	}
 
-	set(pos, id, energy, spread = 0)
-	{
-		let v = this.vec2(pos);
-		return this.cells[pos] = {x: v.x, y: v.y, id, energy, spread};
-	}
+	// set(pos, id, energy, spread = 0)
+	// {
+	// 	let v = this.vec2(pos);
+	// 	return this.cells[pos] = {x: v.x, y: v.y, id, energy, spread};
+	// }
 
   push(pos)
   {
   	if (!this.game.selected) return false;
   	let c = this.get(pos);
-  	if (this.getType(c.id).energy != 0) return false;  	
+  	let t = this.getType(c.id);
+  	if (t.energy != 0) return false;
 
   	if (c.owner == 1 || this.isBorder(pos))
   	{
 	  	c.id = this.game.selected;
+	  	t = this.getType(c.id);
 	  	c.owner = 1;
+	  	c.growing = true;
+	  	c.time = this.game.time(t.energy);
 	  	this.game.selected = '';
-	  	this.game.debugText(' --- ');
+	  	this.game.debugText(' --- ' + pos);
 
   		return true;
   	};
@@ -296,7 +292,7 @@ class Level
 	pop(pos)
 	{
 		let c = this.get(pos);
-		if (this.game.selected || this.getType(c.id).energy == 0) return false;
+		if (this.game.selected || this.getType(c.id).energy == 0 || c.growing) return false;
 		if (c.owner == 0 && this.isBorder(pos)) c.owner = 1;
 		if (c.owner != 1) return false;
 
@@ -352,7 +348,9 @@ class Level
 				x: v.x,
 				y: v.y,
 				id: (v.x < 4 && v.y > 6)? 'earth' : 'rock',
-				owner: (v.x < 4 && v.y > 6)? 1 : 0
+				owner: (v.x < 4 && v.y > 6)? 1 : 0,
+				time: 0,
+				growing: false
 			});
 		}
 
@@ -364,7 +362,12 @@ class Level
 	update()
 	{
 		for(let pos = 0; pos < this.cells.length; pos++) {
-			//if (this.get(pos).spread > 0 && Math.random() < .3) this.spread(pos);
+			let c = this.get(pos);
+			if (c.growing && this.game.time() > c.time) {
+				let obj = this.game.scene.getObjectByName(pos);
+				this.game.setTexture(obj, this.getType(c.id).texture);
+				c.growing = false;
+			}
 		}
 
 	}
