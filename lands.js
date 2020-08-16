@@ -334,9 +334,6 @@ class Level
   	return false;
 	}
 
-	spread(pos)
-	{}
-
 	create(w,h)
 	{
 		this.width = w;
@@ -359,14 +356,30 @@ class Level
 		this.cells[4*w+3].id = 'tree';
 	}
 
+	spread(pos, c, t)
+	{}
+
+	grows(pos, c, t)
+	{
+		let obj = this.game.scene.getObjectByName(pos);
+		this.game.setTexture(obj, t.texture);
+		c.growing = false;
+		c.time = 0;		
+	}
+
 	update()
 	{
 		for(let pos = 0; pos < this.cells.length; pos++) {
 			let c = this.get(pos);
+			let t = this.getType(c.id);
+
 			if (c.growing && this.game.time() > c.time) {
-				let obj = this.game.scene.getObjectByName(pos);
-				this.game.setTexture(obj, this.getType(c.id).texture);
-				c.growing = false;
+				this.grows(pos, c, t);
+			}
+
+			if (!c.growing && t.spread) {
+				if (!c.time) c.time = this.game.time(2);
+				if (this.game.time() > c.time) this.spread(pos, c, t);
 			}
 		}
 
