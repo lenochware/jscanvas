@@ -357,14 +357,34 @@ class Level
 	}
 
 	spread(pos, c, t)
-	{}
+	{
+		c.time = this.game.time(Utils.random(5,35));
+
+		let cells = this.getNeighbour(pos).filter( c => this.getType(c.id).energy == 0);
+
+		//console.log(this.getNeighbour(pos));
+
+		if (cells.length == 0) return false;
+	
+		let nc = cells[Math.floor(Math.random() * cells.length)];
+		let nct = this.getType(t.spread);
+
+		nc.id = t.spread;
+		nc.energy = nct.energy;
+		this.setTexture(nc.y * this.width + nc.x, nct.texture);
+	}
 
 	grows(pos, c, t)
 	{
-		let obj = this.game.scene.getObjectByName(pos);
-		this.game.setTexture(obj, t.texture);
+		this.setTexture(pos, t.texture);
 		c.growing = false;
-		c.time = 0;		
+		c.time = 0;
+	}
+
+	setTexture(pos, texture)
+	{
+		let obj = this.game.scene.getObjectByName(pos);
+		this.game.setTexture(obj, texture);
 	}
 
 	update()
@@ -378,7 +398,7 @@ class Level
 			}
 
 			if (!c.growing && t.spread) {
-				if (!c.time) c.time = this.game.time(2);
+				if (!c.time) c.time = this.game.time(Utils.random(5,35));
 				if (this.game.time() > c.time) this.spread(pos, c, t);
 			}
 		}
